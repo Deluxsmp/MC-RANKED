@@ -3,7 +3,7 @@
    The same icon is automatically used in the mode buttons,
    Overall leaderboard rows, and the player details modal.
 */
-const VORTEX_ICONS = {
+const MCRANCKED_ICONS = {
   overall: 'https://i.postimg.cc/tTKmnYtK/7050-removebg-preview.png',
   vanilla: 'https://www.mctiers.it/modes/vanilla.svg',
   uhc: 'https://www.mctiers.it/modes/uhc.svg',
