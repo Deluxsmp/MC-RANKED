@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MCRANCKED — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#08090d;color:#fff;font-family:Inter,Arial,sans-serif}.wrap{width:min(1100px,94%);margin:32px auto}.card{background:#11131a;border:1px solid #252936;border-radius:16px;padding:22px;margin-bottom:18px}h1,h2,h3{margin:0 0 10px}p{color:#9aa0ad}.hidden{display:none!important}.login{max-width:420px;margin:100px auto}.field label{display:block;font-size:13px;color:#aeb4c0;margin:0 0 7px}.input,.select{width:100%;padding:12px 13px;background:#090b10;border:1px solid #303542;border-radius:10px;color:#fff;outline:none}.input:focus,.select:focus{border-color:#777}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.modebox{background:#0c0e13;border:1px solid #292d38;border-radius:12px;padding:14px}.modebox h3{font-size:14px}.modebox .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btns{display:flex;gap:9px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:11px 15px;background:#252936;color:#fff;font-weight:700;cursor:pointer}.btn.primary{background:#fff;color:#08090d}.btn.green{background:#1f7148}.btn.red{background:#792525}.btn:hover{filter:brightness(1.12)}.msg{color:#9aa0ad;margin-top:10px;min-height:18px}.player{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid #242833}.player:last-child{border-bottom:0}.playername{font-weight:700}.meta{font-size:12px;color:#858b98;margin-top:4px}.actions{display:flex;gap:7px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.hint{font-size:13px;color:#858b98;line-height:1.6}.status{padding:9px 11px;border-radius:9px;background:#0b0d12;border:1px solid #272b35;font-size:12px;color:#aeb4c0}.check{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:12px;color:#969ca8}.check input{accent-color:#fff}@media(max-width:700px){.grid,.modes{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.player{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions .btn{flex:1}.modebox .row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="wrap login">
+  <div class="card">
+    <h1>MCRANCKED</h1>
+    <p>Admin Panel</p>
+    <div class="field">
+      <label>Password</label>
+      <input id="password" class="input" type="password" placeholder="Admin password" autocomplete="off">
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="login()">Login</button>
+    <div id="loginMsg" class="msg"></div>
+  </div>
+</div>
+
+<div id="adminScreen" class="wrap hidden">
+  <div class="card">
+    <div class="topbar">
+      <div>
+        <h1>MCRANCKED Admin Panel</h1>
+        <p style="margin:0">Manage players, ranks and points.</p>
+      </div>
+      <button class="btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="formTitle">Add Player</h2>
+    <p class="hint">Choose “Not Tested” when a player has no rank in that mode. The ranking box will stay empty on the public site.</p>
+    <input id="editId" type="hidden">
+
+    <div class="grid">
+      <div class="field"><label>Player Name</label><input id="name" class="input" placeholder="Minecraft username"></div>
+      <div class="field"><label>Region</label><select id="region" class="select"><option value="AS">AS — Asia</option><option value="EU">EU — Europe</option><option value="NA">NA — North America</option><option value="ME">ME — Middle East</option></select></div>
+      <div class="field"><label>Skin URL (optional)</label><input id="skin" class="input" placeholder="Leave empty for automatic Minecraft skin"></div>
+      <div class="field"><label>NameMC URL (optional)</label><input id="namemc" class="input" placeholder="Leave empty to use username automatically"></div>
+    </div>
+
+    <h3 style="margin-top:24px">Gamemode Ranks</h3>
+    <div id="modeFields" class="modes"></div>
+
+    <div class="btns" style="margin-top:18px">
+      <button class="btn green" onclick="savePlayer()">Save Player</button>
+      <button class="btn" onclick="clearForm()">Clear</button>
+    </div>
+    <div id="saveMsg" class="msg"></div>
+  </div>
+
+  <div class="card">
+    <div class="topbar">
+      <div><h2>Players</h2><p style="margin:0">Existing player data loaded from players.js/local storage.</p></div>
+      <div id="count" class="status">0 players</div>
+    </div>
+    <input id="search" class="input" style="margin-top:15px" placeholder="Search player..." oninput="renderPlayers()">
+    <div id="playerList" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Download Player Data</h2>
+    <p class="hint">This button downloads <b>players.js only</b>. It NEVER downloads or changes app.js. Replace your website’s old players.js with this downloaded file.</p>
+    <button class="btn primary" onclick="downloadPlayersJS()">⬇ Download players.js</button>
+    <div id="downloadMsg" class="msg"></div>
+  </div>
+</div>
+
+<script src="players.js"></script>
+<script>
+/* =========================
+   MCRANCKED ADMIN CONFIG
+========================= */
+const ADMIN_PASSWORD = "mcranked@admin1";
+
+const MODES = [
+  {id:'vanilla', name:'Vanilla'},
+  {id:'uhc', name:'UHC'},
+  {id:'pot', name:'Pot'},
+  {id:'nethop', name:'NetHop'},
+  {id:'smp', name:'SMP'},
+  {id:'sword', name:'Sword'},
+  {id:'axe', name:'Axe'},
+  {id:'mace', name:'Mace'}
+];
+
+const TIERS = ['', 'HT1','LT1','HT2','LT2','HT3','LT3','HT4','LT4','HT5','LT5'];
+
+function safeJSON(value){
+  try{return JSON.parse(value)}catch{return []}
+}
+
+// Start with a clean player database. Old admin/localStorage player data is intentionally cleared.
+localStorage.removeItem('vortexAdminPlayers');
+let players = [];
+
+function saveLocal(){
+  localStorage.setItem('vortexAdminPlayers',JSON.stringify(players));
+}
+
+function login(){
+  if(document.getElementById('password').value===ADMIN_PASSWORD){
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminScreen').classList.remove('hidden');
+    renderPlayers();
+  }else document.getElementById('loginMsg').textContent='Incorrect password.';
+}
+function logout(){
+  document.getElementById('adminScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('password').value='';
+}
+
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function id(){return Date.now()+Math.floor(Math.random()*100000)}
+function pointsValue(v){return v===''||v===null||v===undefined?'':Number(v)}
+
+function buildModeFields(player={}){
+  document.getElementById('modeFields').innerHTML=MODES.map(m=>{
+    const r=player.results?.[m.id]||{};
+    const selected=r.tier||'';
+    const pts=(selected && r.points!=='' && r.points!==undefined && r.points!==null)?r.points:'';
+    return `<div class="modebox">
+      <h3>${m.name}</h3>
+      <div class="row">
+        <select id="tier_${m.id}" class="select" onchange="tierChanged('${m.id}')">
+          <option value="">Not Tested</option>
+          ${TIERS.filter(Boolean).map(t=>`<option value="${t}" ${selected===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+        <input id="points_${m.id}" class="input" type="number" min="0" step="1" placeholder="Points" value="${esc(pts)}">
+      </div>
+      <label class="check"><input id="auto_${m.id}" type="checkbox"> Keep points empty when Not Tested</label>
+    </div>`;
+  }).join('');
+}
+
+function tierChanged(mode){
+  const tier=document.getElementById('tier_'+mode).value;
+  const points=document.getElementById('points_'+mode);
+  if(!tier) points.value='';
+}
+
+function getFormPlayer(){
+  const results={};
+  MODES.forEach(m=>{
+    const tier=document.getElementById('tier_'+m.id).value;
+    const pv=document.getElementById('points_'+m.id).value.trim();
+    results[m.id]={tier:tier,points:tier&&pv!==''?Number(pv):''};
+  });
+  return {
+    id:document.getElementById('editId').value?Number(document.getElementById('editId').value):id(),
+    name:document.getElementById('name').value.trim(),
+    region:document.getElementById('region').value,
+    skinUrl:document.getElementById('skin').value.trim(),
+    namemc:document.getElementById('namemc').value.trim(),
+    results
+  };
+}
+
+function calculate(){
+  players.forEach(p=>{
+    let total=0;
+    MODES.forEach(m=>{
+      const r=p.results?.[m.id];
+      if(r && r.points!=='' && r.points!==null && r.points!==undefined && !Number.isNaN(Number(r.points))) total+=Number(r.points);
+    });
+    p.totalPoints=total;
+  });
+  players.sort((a,b)=>(b.totalPoints||0)-(a.totalPoints||0));
+  players.forEach((p,i)=>p.position=i+1);
+}
+
+function savePlayer(){
+  const p=getFormPlayer();
+  if(!p.name){document.getElementById('saveMsg').textContent='Player name is required.';return}
+
+  const same=players.findIndex(x=>x.name.toLowerCase()===p.name.toLowerCase());
+  const editing=players.findIndex(x=>x.id===p.id);
+
+  if(same!==-1 && same!==editing){
+    p.id=players[same].id;
+    players[same]=p;
+  }else if(editing!==-1){
+    players[editing]=p;
+  }else players.push(p);
+
+  calculate();
+  saveLocal();
+  document.getElementById('saveMsg').textContent='Player saved. Download players.js when ready.';
+  clearForm();
+  renderPlayers();
+}
+
+function editPlayer(pid){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  document.getElementById('editId').value=p.id;
+  document.getElementById('name').value=p.name||'';
+  document.getElementById('region').value=p.region||'AS';
+  document.getElementById('skin').value=p.skinUrl||'';
+  document.getElementById('namemc').value=p.namemc||'';
+  buildModeFields(p);
+  document.getElementById('formTitle').textContent='Edit Player';
+  scrollTo({top:0,behavior:'smooth'});
+}
+
+function deletePlayer(pid){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  if(!confirm('Delete '+p.name+'?'))return;
+  players=players.filter(x=>x.id!==pid);
+  calculate();saveLocal();renderPlayers();
+}
+
+function clearForm(){
+  document.getElementById('editId').value='';
+  document.getElementById('name').value='';
+  document.getElementById('region').value='AS';
+  document.getElementById('skin').value='';
+  document.getElementById('namemc').value='';
+  buildModeFields();
+  document.getElementById('formTitle').textContent='Add Player';
+}
+
+function renderPlayers(){
+  calculate();
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  const list=players.filter(p=>p.name.toLowerCase().includes(q));
+  document.getElementById('count').textContent=players.length+' player'+(players.length===1?'':'s');
+  document.getElementById('playerList').innerHTML=list.length?list.map(p=>`<div class="player">
+    <div><div class="playername">#${p.position||'-'} ${esc(p.name)}</div><div class="meta">${esc(p.region||'')} • ${p.totalPoints||0} points</div></div>
+    <div class="actions"><button class="btn" onclick="editPlayer(${p.id})">Edit</button><button class="btn red" onclick="deletePlayer(${p.id})">Delete</button></div>
+  </div>`).join(''):'<p style="color:#777">No players found.</p>';
+}
+
+function downloadPlayersJS(){
+  calculate();saveLocal();
+  const output = `/* =====================================================\n   MCRANCKED — PLAYER DATA\n   Generated from Admin Panel\n   Replace ONLY your old players.js with this file.\n====================================================== */\n\nconst MCRANCKED_PLAYERS = ${JSON.stringify(players,null,2)};\n`;
+  const blob=new Blob([output],{type:'application/javascript;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='players.js';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  document.getElementById('downloadMsg').textContent='players.js downloaded. Replace only players.js on your website.';
+}
+
+buildModeFields();
+</script>
+</body>
+</html>
