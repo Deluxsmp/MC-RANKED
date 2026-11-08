@@ -222,7 +222,7 @@
     }).join("") : "";
 
     const rows = rest.map((p) => {
-      const chips = ["vanilla", "uhc", "pot", "sword", "axe"].map((id) => {
+      const chips = ["vanilla", "uhc", "pot", "nethpot", "sword", "axe"].map((id) => {
         const r = result(p, id); const mo = modeById(id);
         if (!isTested(r)) return "";
         return `<span class="kit-chip">${iconHTML(mo, "mini-icon-img")}<span class="tier-label ${tierClass(r.tier)}">${esc(r.tier)}</span></span>`;

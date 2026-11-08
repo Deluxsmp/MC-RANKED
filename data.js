@@ -20,6 +20,8 @@
    - One legacy kit removed everywhere (MODES, ICONS, badge catalog).
    - Home stat cards are now LIVE metrics derived from the real data
      (players, kits, tiers, regions, countries, tourneys, news, servers).
+   v9 changes (per user request):
+   - Kit re-added: "NethPot" (MODES, ICONS, badge catalog, home kit chips).
    ============================================================ */
 
 /* ---------- SITE CONFIG ---------- */
@@ -108,6 +110,7 @@ const MODES = [
   { id: "pot",          n: "Pot",           i: "\ud83e\uddea", icon: "",                 group: "core" },
   { id: "sword",        n: "Sword",         i: "\ud83d\udde1\ufe0f", icon: "",                 group: "core" },
   { id: "axe",          n: "Axe",           i: "\ud83e\ude93", icon: "",                 group: "core" },
+  { id: "nethpot",      n: "NethPot",       i: "🟣", icon: "",                 group: "core" },
   /* ---- kept new kits ---- */
   { id: "diamond-smp",  n: "Diamond SMP",   i: "\ud83d\udd37", icon: "",                 group: "new" },
   { id: "spearmace",    n: "SpearMace",     i: "\ud83d\udd31", icon: "",                 group: "new" }
@@ -152,7 +155,8 @@ const BADGE_CATALOG = {
   "Tester": "#c792ea", "All-Rounder": "#7fb2ff", "Pot Threat": "#ff9c51",
   "Aggressive Duelist": "#ff647c", "Pot Main": "#ff9c51",
   "Grinder": "#9fb0c6", "Oceania Top": "#4dd0e1", "Duelist": "#9fb0c6",
-  "Sword Grinder": "#9fb0c6", "Sword Main": "#9fb0c6"
+  "Sword Grinder": "#9fb0c6", "Sword Main": "#9fb0c6",
+  "NethPot Main": "#c792ea", "NethPot Specialist": "#7fb2ff"
 };
 
 /* ---------- ICONS (only kept kits) ---------- */
@@ -164,7 +168,8 @@ const ICONS = {
   sword: "https://www.mctiers.it/modes/sword.svg",
   axe: "https://tiermaker.com/images/media/template_images/2024/18026725/all-marlow-mctiers-and-subtiers-pvp-gamemodes-18026725/axe.png",
   "diamond-smp": "https://www.mctiers.it/modes/diasmp.svg",
-  spearmace: "https://www.mctiers.it/modes/spearmace.svg"
+  spearmace: "https://www.mctiers.it/modes/spearmace.svg",
+  nethpot: "https://www.mctiers.it/modes/nethpot.svg"
 };
 
 /* ---------- EXPORT (global) ---------- */
