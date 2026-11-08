@@ -2,7 +2,7 @@ MCRANCKED — NO PASSWORD + LIVE RANKING
 
 WHAT THIS VERSION DOES
 - admin.html opens directly. There is NO password box, NO login, and NO Supabase Auth requirement.
-- Add / edit / delete players from the admin page.
+- Add / edit / delete players from the admin page. Each gamemode has MT plus HT1, LT1, HT2, LT2, HT3, LT3, HT4, LT4, HT5 and LT5. New players default to MT for every gamemode. Public ranking cards and player details show MT when a mode has no rank.
 - Player data is stored in the shared Supabase public.players table.
 - The public ranking page refreshes automatically through Supabase Realtime.
 

@@ -25,7 +25,7 @@
 
   <div class="card">
     <h2 id="formTitle">Add Player</h2>
-    <p class="hint">Choose “Not Tested” when a player has no rank in that mode. The ranking box will stay empty on the public site.</p>
+    <p class="hint">Choose “MT” when a player has no rank in that gamemode. The public ranking will show MT.</p>
     <input id="editId" type="hidden">
 
     <div class="grid">
@@ -66,7 +66,7 @@
 <script src="supabase-config.js"></script>
 <script>
 const MODES=[{id:'vanilla',name:'Vanilla'},{id:'uhc',name:'UHC'},{id:'pot',name:'Pot'},{id:'nethop',name:'NetHop'},{id:'smp',name:'SMP'},{id:'sword',name:'Sword'},{id:'axe',name:'Axe'},{id:'mace',name:'Mace'}];
-const TIERS=['','HT1','LT1','HT2','LT2','HT3','LT3','HT4','LT4','HT5','LT5'];
+const TIERS=['MT','HT1','LT1','HT2','LT2','HT3','LT3','HT4','LT4','HT5','LT5'];
 let players=[]; let supabase=null; let channel=null;
 const cfgOK=window.SUPABASE_URL && !window.SUPABASE_URL.startsWith('PASTE_') && window.SUPABASE_ANON_KEY && !window.SUPABASE_ANON_KEY.startsWith('PASTE_');
 if(cfgOK) supabase=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
@@ -76,9 +76,9 @@ function id(){return Date.now()}
 // No admin password or Supabase Auth is used. The panel opens directly.
 async function loadPlayers(){if(!supabase){msg('saveMsg','Supabase setup is missing. Keep your existing supabase-config.js URL and anon key.');return}const {data,error}=await supabase.from('players').select('*').order('totalPoints',{ascending:false});if(error){msg('saveMsg',error.message);return}players=(data||[]).map(row=>({...row,skinUrl:row.skinUrl||''}));calculate();renderPlayers()}
 function subscribePlayers(){channel=supabase.channel('shared-player-list').on('postgres_changes',{event:'*',schema:'public',table:'players'},()=>loadPlayers()).subscribe()}
-function buildModeFields(player={}){document.getElementById('modeFields').innerHTML=MODES.map(m=>{const r=player.results?.[m.id]||{},selected=r.tier||'',pts=selected&&r.points!==''&&r.points!=null?r.points:'';return `<div class="modebox"><h3>${m.name}</h3><div class="row"><select id="tier_${m.id}" class="select" onchange="tierChanged('${m.id}')"><option value="">Not Tested</option>${TIERS.filter(Boolean).map(t=>`<option value="${t}" ${selected===t?'selected':''}>${t}</option>`).join('')}</select><input id="points_${m.id}" class="input" type="number" min="0" step="1" placeholder="Points" value="${esc(pts)}"></div></div>`}).join('')}
-function tierChanged(mode){if(!document.getElementById('tier_'+mode).value)document.getElementById('points_'+mode).value=''}
-function getFormPlayer(){const results={};MODES.forEach(m=>{const tier=document.getElementById('tier_'+m.id).value,pv=document.getElementById('points_'+m.id).value.trim();results[m.id]={tier,points:tier&&pv!==''?Number(pv):''}});return {id:Number(document.getElementById('editId').value)||id(),name:document.getElementById('name').value.trim(),region:document.getElementById('region').value,skinUrl:document.getElementById('skin').value.trim(),namemc:document.getElementById('namemc').value.trim(),results}}
+function buildModeFields(player={}){document.getElementById('modeFields').innerHTML=MODES.map(m=>{const r=player.results?.[m.id]||{},selected=r.tier||'MT',pts=selected!=='MT'&&r.points!==''&&r.points!=null?r.points:'';return `<div class="modebox"><h3>${m.name}</h3><div class="row"><select id="tier_${m.id}" class="select" onchange="tierChanged('${m.id}')">${TIERS.map(t=>`<option value="${t}" ${selected===t?'selected':''}>${t}</option>`).join('')}</select><input id="points_${m.id}" class="input" type="number" min="0" step="1" placeholder="Points" value="${esc(pts)}"></div></div>`}).join('')}
+function tierChanged(mode){if(document.getElementById('tier_'+mode).value==='MT')document.getElementById('points_'+mode).value=''}
+function getFormPlayer(){const results={};MODES.forEach(m=>{const tier=document.getElementById('tier_'+m.id).value,pv=document.getElementById('points_'+m.id).value.trim();results[m.id]={tier,points:tier!=='MT'&&pv!==''?Number(pv):''}});return {id:Number(document.getElementById('editId').value)||id(),name:document.getElementById('name').value.trim(),region:document.getElementById('region').value,skinUrl:document.getElementById('skin').value.trim(),namemc:document.getElementById('namemc').value.trim(),results}}
 function calculate(){players.forEach(p=>{p.totalPoints=MODES.reduce((sum,m)=>{const v=p.results?.[m.id]?.points;return sum+(v!==''&&v!=null&&!Number.isNaN(Number(v))?Number(v):0)},0)});players.sort((a,b)=>b.totalPoints-a.totalPoints);players.forEach((p,i)=>p.position=i+1)}
 async function savePlayer(){if(!supabase){msg('saveMsg','Supabase setup is missing.');return}const p=getFormPlayer();if(!p.name){msg('saveMsg','Player name is required.');return}const duplicate=players.find(x=>x.name.toLowerCase()===p.name.toLowerCase()&&x.id!==p.id);if(duplicate)p.id=duplicate.id;const existing=players.find(x=>x.id===p.id);if(existing)p.position=existing.position;calculate();const payload={...p,updated_at:new Date().toISOString()};const {error}=await supabase.from('players').upsert(payload);if(error){msg('saveMsg',error.message);return}msg('saveMsg','Saved online! All admins and the ranking page will sync.');clearForm();await loadPlayers()}
 function editPlayer(pid){const p=players.find(x=>x.id===pid);if(!p)return;document.getElementById('editId').value=p.id;document.getElementById('name').value=p.name||'';document.getElementById('region').value=p.region||'AS';document.getElementById('skin').value=p.skinUrl||'';document.getElementById('namemc').value=p.namemc||'';buildModeFields(p);document.getElementById('formTitle').textContent='Edit Player';scrollTo({top:0,behavior:'smooth'})}
