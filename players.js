@@ -1,51 +1,51 @@
 /* =====================================================
-   MCRANCKED â€” PLAYER DATA
+   MCRANCKED — PLAYER DATA
    Generated from Admin Panel
    Replace ONLY your old players.js with this file.
 ====================================================== */
 
 const MCRANCKED_PLAYERS = [
   {
-    "id": 1791363847793,
+    "id": 1794110612058,
     "name": "Itz_Dhrubo",
     "region": "AS",
     "skinUrl": "",
     "namemc": "",
     "results": {
       "vanilla": {
-        "tier": "HT1",
-        "points": 100
+        "tier": "LT5",
+        "points": 5
       },
       "uhc": {
-        "tier": "HT1",
-        "points": 100
+        "tier": "",
+        "points": ""
       },
       "pot": {
-        "tier": "HT1",
-        "points": 100
+        "tier": "",
+        "points": ""
       },
       "nethop": {
-        "tier": "HT1",
-        "points": 100
+        "tier": "",
+        "points": ""
       },
       "smp": {
-        "tier": "HT1",
-        "points": 100
+        "tier": "",
+        "points": ""
       },
       "sword": {
-        "tier": "HT1",
-        "points": 100
+        "tier": "",
+        "points": ""
       },
       "axe": {
-        "tier": "HT1",
-        "points": 100
+        "tier": "",
+        "points": ""
       },
       "mace": {
-        "tier": "HT1",
-        "points": 100
+        "tier": "",
+        "points": ""
       }
     },
-    "totalPoints": 800,
+    "totalPoints": 5,
     "position": 1
   }
 ];
