@@ -23,3 +23,11 @@ In your existing supabase-config.js, add this line with the email of the existin
 window.ADMIN_LOGIN_EMAIL = "YOUR_EXISTING_ADMIN_EMAIL";
 Do not replace your existing Supabase URL/key. The email is stored in config so the login page asks only for a password.
 After login, use "Change Admin Password" inside admin.html to update that account password.
+
+LOGIN SETTINGS:
+- Admin login screen asks for PASSWORD only; it does not ask for an email.
+- Keep your existing supabase-config.js URL and publishable/anon key unchanged.
+- Add this one-time setting to that existing config if it is not already present:
+  window.ADMIN_LOGIN_EMAIL = "YOUR_EXISTING_ADMIN_EMAIL";
+- Supabase Auth must already have this admin account's password set to mcranked@admin. The website cannot change a Supabase Auth password just by editing HTML.
+- Do not publish a real password inside public HTML/JavaScript. This ZIP does not hardcode the password.
