@@ -17,7 +17,7 @@
   const D = window.MCRANKED || {};
   const SITE = D.SITE || {};
   const MODES = D.MODES || [];
-  const PLAYERS = D.PLAYERS || [];
+  let PLAYERS = D.PLAYERS || [];
   const ICONS = D.ICONS || {};
   const REGIONS = D.REGIONS || {};
   const TIER_DEFS = D.TIER_DEFS || [];
@@ -705,7 +705,7 @@
   }
 
   /* ---------- boot ---------- */
-  document.addEventListener("DOMContentLoaded", () => {
+  function renderAll() {
     renderNav();
     renderFooter();
     renderHome();
@@ -716,5 +716,24 @@
     renderNews();
     renderServers();
     initReveal();
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    /* Option A: if supabase-live.js is present and configured, it exposes
+       window.MCRANKED_LIVE — a promise of the live players array. When it
+       resolves with an array we render that instead of the static
+       players.js. On any failure it resolves null and we keep players.js. */
+    try {
+      if (window.MCRANKED_LIVE && typeof window.MCRANKED_LIVE.then === "function") {
+        const live = await window.MCRANKED_LIVE;
+        if (Array.isArray(live)) {
+          PLAYERS = live;
+          D.PLAYERS = live;
+        }
+      }
+    } catch (e) {
+      console.warn("[MCRANKED] live data unavailable, using players.js");
+    }
+    renderAll();
   });
 })();
