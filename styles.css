@@ -144,12 +144,12 @@ img{max-width:100%}
 /* ---------------- PODIUM ---------------- */
 .podium{display:grid;grid-template-columns:1fr 1.18fr 1fr;gap:16px;align-items:end;margin-bottom:22px}
 .podium-card{
-  position:relative;border-radius:var(--radius);padding:22px 16px 18px;text-align:center;
+  position:relative;border-radius:var(--radius);padding:30px 16px 22px;text-align:center;
   background:linear-gradient(180deg,var(--panel-2),var(--panel));
   border:1px solid var(--line-2);transition:.22s;overflow:hidden;
 }
 .podium-card:hover{transform:translateY(-4px);border-color:var(--accent)}
-.podium-card.first{border-color:rgba(255,216,63,.5);box-shadow:0 0 0 1px rgba(255,216,63,.18),0 20px 50px rgba(0,0,0,.5);padding-top:30px}
+.podium-card.first{border-color:rgba(255,216,63,.5);box-shadow:0 0 0 1px rgba(255,216,63,.18),0 20px 50px rgba(0,0,0,.5);padding-top:34px}
 .podium-card.second{border-color:rgba(216,224,234,.35)}
 .podium-card.third{border-color:rgba(216,135,61,.4)}
 .podium-place{
@@ -159,8 +159,9 @@ img{max-width:100%}
 .podium-card.first .podium-place{background:linear-gradient(135deg,#ffd83f,#e0a800);color:#241c00}
 .podium-card.second .podium-place{background:linear-gradient(135deg,#e6ecf4,#aab6c6);color:#1a1f28}
 .podium-card.third .podium-place{background:linear-gradient(135deg,#e79a4e,#b96a24);color:#241300}
-.podium-avatar{width:96px;height:96px;margin:6px auto 10px;display:block;object-fit:contain;object-position:center top;filter:drop-shadow(0 8px 12px rgba(0,0,0,.7))}
+.podium-avatar{width:120px;height:190px;margin:4px auto 12px;display:block;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 18px rgba(0,0,0,.75))}
 .podium-name{font-size:16px;font-weight:900;letter-spacing:-.3px}
+.podium-ranknum{position:absolute;bottom:10px;right:12px;font-size:38px;font-weight:900;font-style:italic;color:rgba(255,255,255,.08);line-height:1}
 .podium-tier{display:inline-block;margin-top:7px;font-size:11px;font-weight:900;padding:4px 9px;border-radius:6px}
 
 /* ---------------- RANK / BADGE CHIP (auto-assigned by points) ---------------- */
@@ -188,8 +189,9 @@ img{max-width:100%}
 .board-row.rank-2 .pos{color:var(--silver)}
 .board-row.rank-3 .pos{color:var(--bronze)}
 .p-cell{display:flex;align-items:center;gap:12px;min-width:0}
-.p-avatar{width:44px;height:44px;flex:0 0 44px;object-fit:contain;object-position:center top;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
+.p-avatar{width:52px;height:52px;flex:0 0 52px;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
 .p-name{font-size:14.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-skin{width:72px;height:72px;flex:0 0 72px;object-fit:contain;object-position:center top;filter:drop-shadow(0 6px 9px rgba(0,0,0,.6))}
 .p-meta{font-size:11px;color:var(--muted-2);margin-top:2px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
 .region-badge{font-size:10.5px;font-weight:900;padding:6px 9px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line-2);text-align:center;justify-self:center}
 .kit-chips{display:flex;gap:6px;flex-wrap:wrap}
@@ -311,11 +313,11 @@ img{max-width:100%}
 .tier-col.t3 .tier-col-head{background:#4b3020;color:#e58b48}
 .tier-col.t4 .tier-col-head,.tier-col.t5 .tier-col-head{background:#202a39;color:#c5cfdd}
 .tier-col-list{min-height:60px}
-.tier-player{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s}
+.tier-player{display:flex;align-items:center;gap:12px;padding:13px 14px 15px;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s}
 .tier-player:hover{background:var(--panel-2)}
-.tier-player img{width:34px;height:34px;object-fit:contain;object-position:center top}
-.tier-player .name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tier-player .pts{margin-left:auto;font-size:11px;color:var(--muted-2);font-weight:800}
+.tier-player .tier-skin{width:56px;height:56px;flex:0 0 56px;object-fit:contain;object-position:center top;filter:drop-shadow(0 5px 8px rgba(0,0,0,.55))}
+.tier-player .name{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tier-player .pts{margin-left:auto;font-size:11px;color:var(--muted-2);font-weight:800;background:var(--panel-2);border:1px solid var(--line-2);padding:3px 8px;border-radius:6px}
 .tier-empty{padding:16px;text-align:center;color:var(--muted-2);font-size:12px}
 
 /* ---------------- MODAL ---------------- */
@@ -324,7 +326,9 @@ img{max-width:100%}
 .modal-x{position:absolute;right:16px;top:12px;background:none;border:0;color:var(--muted);font-size:26px;cursor:pointer;line-height:1}
 .modal-x:hover{color:#fff}
 .modal-top{text-align:center;padding-bottom:18px;border-bottom:1px solid var(--line)}
-.modal-avatar{width:120px;height:120px;margin:0 auto 10px;display:block;object-fit:contain;object-position:center top;filter:drop-shadow(0 8px 14px rgba(0,0,0,.7))}
+.modal-avatar{width:140px;height:210px;margin:0 auto 12px;display:block;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 10px 16px rgba(0,0,0,.7))}
+.skin-full{image-rendering:auto}
+.skin-head{image-rendering:auto}
 .modal-top h2{margin:0 0 8px;font-size:24px;font-weight:900;letter-spacing:-.5px}
 .modal-title-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:16px;background:rgba(255,216,63,.14);border:1px solid rgba(255,216,63,.3);color:var(--gold);font-size:12px;font-weight:800}
 .modal-region{color:var(--muted);font-size:13px;font-weight:700;margin:10px 0 12px}

@@ -31,8 +31,13 @@
   const tierClass = (t) => "t-" + String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const tierDef = (code) => TIER_DEFS.find((t) => t.code === code) || { color: "#8b98ab", bg: "#232c39", label: code };
   const overallTier = (p) => { const t = TIER_DEFS.find((d) => (p.totalPoints || 0) >= d.min); return t ? t.code : ""; };
-  const skinUrl = (p) => p.skinUrl || `https://mc-heads.net/body/${encodeURIComponent(p.name)}/100.png`;
-  const skinFallback = (img) => { if (img.dataset.failed === "1") { img.src = "https://mc-heads.net/body/Steve/100.png"; return; } img.dataset.failed = "1"; img.src = "https://mc-heads.net/body/Steve/100.png"; };
+  /* v13: skins render LARGE (mcpvp.com style).
+     skinUrl   -> 3D isometric head+bust (list rows, tier columns, player cards)
+     skinBodyUrl -> 3D isometric full body (podium, modal) */
+  const skinUrl = (p) => p.skinUrl || `https://mc-heads.net/head/${encodeURIComponent(p.name)}/200.png`;
+  const skinBodyUrl = (p) => p.skinBodyUrl || `https://mc-heads.net/body/${encodeURIComponent(p.name)}/200.png`;
+  const skinFallback = (img) => { if (img.dataset.failed === "1") { img.src = "https://mc-heads.net/head/Steve/200.png"; return; } img.dataset.failed = "1"; img.src = "https://mc-heads.net/head/Steve/200.png"; };
+  const skinFallbackBody = (img) => { if (img.dataset.failed === "1") { img.src = "https://mc-heads.net/body/Steve/200.png"; return; } img.dataset.failed = "1"; img.src = "https://mc-heads.net/body/Steve/200.png"; };
   const titleFor = (pos) => (pos === 1 ? "Combat Grandmaster" : pos <= 3 ? "Combat Master" : "Combat Ace");
   const emojiFor = (pos) => (pos === 1 ? "👑" : pos <= 3 ? "🏅" : "⚔️");
   /* Badge / rank is auto-assigned from the live leaderboard position:
@@ -169,7 +174,7 @@
     }).join("");
     body.innerHTML = `
       <div class="modal-top">
-        <img class="modal-avatar" src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)">
+        <img class="modal-avatar skin-full" src="${esc(skinBodyUrl(p))}" alt="${esc(p.name)}" onerror="skinFallbackBody(this)">
         <h2>${esc(p.name)}</h2>
         <div class="modal-title-badge">${badgeChip(p.position || 99)}</div>
         <div class="modal-region">${regionFlag(p.region)} ${esc(regionName(p.region))}${p.country ? " · " + esc(p.country) : ""}</div>
@@ -194,6 +199,7 @@
   }
   window.MCRANKED_openPlayer = openPlayer;
   window.skinFallback = skinFallback;
+  window.skinFallbackBody = skinFallbackBody;
 
   /* ---------- HOME ---------- */
   function renderHome() {
@@ -201,7 +207,7 @@
     if (!root) return;
     const sorted = [...PLAYERS].sort((a, b) => a.position - b.position);
     const top = sorted.slice(0, 3);
-    const rest = sorted.slice(3, 8);
+    const rest = sorted.slice(3, 5);
     const st = derivedStats();
     const statCards = [
       ["players", "Total Players", "\ud83d\udc65"], ["kits", "Kits & Modes", "\ud83c\udfae"],
@@ -214,26 +220,25 @@
       const cls = ["first", "second", "third"][i];
       return `<a class="podium-card ${cls}" href="#" data-player="${p.id}">
         <span class="podium-place">${p.position}</span>
-        <img class="podium-avatar" src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)">
         <div class="podium-name">${esc(p.name)}</div>
+        <img class="podium-avatar skin-full" src="${esc(skinBodyUrl(p))}" alt="${esc(p.name)}" onerror="skinFallbackBody(this)">
         ${badgeChip(p.position)}
         <span class="podium-points">${p.totalPoints} Points</span>
+        <span class="podium-ranknum">#${p.position}</span>
       </a>`;
     }).join("") : "";
 
+    /* v13: mcpvp.com-style top-5 — podium for #1-3, compact list for #4-5.
+       Each list row shows a small FULL-BODY skin, name, tier badge and points. */
     const rows = rest.map((p) => {
-      const chips = ["vanilla", "uhc", "pot", "nethpot", "sword", "axe"].map((id) => {
-        const r = result(p, id); const mo = modeById(id);
-        if (!isTested(r)) return "";
-        return `<span class="kit-chip">${iconHTML(mo, "mini-icon-img")}<span class="tier-label ${tierClass(r.tier)}">${esc(r.tier)}</span></span>`;
-      }).join("");
-      return `<div class="board-row rank-${p.position}" data-player="${p.id}">
-        <div class="pos">${p.position}</div>
-        <div class="p-cell"><img class="p-avatar" src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)">
-          <div><div class="p-name">${esc(p.name)}</div><div class="p-meta">${badgeChip(p.position, "rank-badge-sm")}</div></div></div>
-        <div class="region-badge">${regionFlag(p.region)} ${esc(p.region)}</div>
-        <div class="kit-chips">${chips}</div>
-        <div class="points-cell">${p.totalPoints}<small>points</small></div>
+      const t = overallTier(p);
+      const td = tierDef(t);
+      return `<div class="home-rank-row rank-${p.position}" data-player="${p.id}">
+        <div class="hrr-pos">${p.position}</div>
+        <img class="hrr-skin skin-full" src="${esc(skinBodyUrl(p))}" alt="${esc(p.name)}" onerror="skinFallbackBody(this)">
+        <div class="hrr-name">${esc(p.name)}<span class="hrr-region">${regionFlag(p.region)} ${esc(p.region)}</span></div>
+        <span class="hrr-tier" style="color:${td.color};background:${td.bg};border-color:${td.color}55">${esc(t || "—")}</span>
+        <div class="hrr-points">${p.totalPoints}<small>points</small></div>
       </div>`;
     }).join("");
 
@@ -247,10 +252,7 @@
     }).join("");
 
     const leaderboardBlock = `<div class="home-podium">${podium}</div>
-         <div class="home-board">
-           <div class="board-head"><span>#</span><span>Player</span><span>Region</span><span>Contributing Kits</span><span style="text-align:right">Points</span></div>
-           ${rows}
-         </div>`;
+         ${rows ? `<div class="home-rank-list">${rows}</div>` : ""}`;
 
     const news = (D.NEWS || []).slice(0, 2).map((n) => `
       <article class="news-card">
@@ -479,7 +481,7 @@
           <div class="tier-col-head">${iconHTML(mo, "mini-icon-img")} Tier ${n}</div>
           <div class="tier-col-list">${buckets[n].map((p) => {
             const r = result(p, tiersState.mode);
-            return `<div class="tier-player" data-player="${p.id}"><img src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)"><span class="name">${esc(p.name)}</span><span class="pts">${esc(r.tier)}</span></div>`;
+            return `<div class="tier-player" data-player="${p.id}"><img class="tier-skin" src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)"><span class="name">${esc(p.name)}</span><span class="pts">${esc(r.tier)}</span></div>`;
           }).join("")}</div>
         </div>`).join("")}</div>`;
     }
@@ -515,7 +517,7 @@
   function playerCard(p) {
     return `<div class="card" data-player="${p.id}" style="cursor:pointer">
       <div style="display:flex;gap:14px;align-items:center">
-        <img src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)" style="width:64px;height:64px;object-fit:contain;object-position:center top">
+        <img class="pc-skin" src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)">
         <div style="min-width:0">
           <div class="p-name">${esc(p.name)}</div>
           <div class="p-meta">${regionFlag(p.region)} ${esc(p.country || regionName(p.region))} · #${p.position}</div>
@@ -534,6 +536,13 @@
     const root = document.getElementById("players-root");
     if (!root) return;
     const grid = [...PLAYERS].sort((a, b) => a.position - b.position).map(playerCard).join("");
+    const emptyState = `<div class="card" style="grid-column:1/-1;padding:28px;text-align:center;line-height:1.8;">
+        <div style="font-size:34px;margin-bottom:8px;">👤</div>
+        <h3 style="margin:0 0 8px;">এখনো কোনো player নেই</h3>
+        <p style="margin:0;opacity:.8;font-size:14px;">Player list খালি — এটা স্বাভাবিক।<br>
+        Discord bot-এ <code>/register</code> বা <code>/result</code> দিলে player এখানে automatic যোগ হবে।<br>
+        অথবা <a href="admin.html">Admin Panel</a> থেকে player যোগ করে <code>players.js</code> download করুন।</p>
+      </div>`;
     root.innerHTML = `
       <div class="page-head"><div class="wrap">
         <div class="crumbs"><a href="index.html">Home</a> / Players</div>
@@ -545,19 +554,49 @@
           <input class="input search" id="pSearch" placeholder="Search player..." type="search">
           <select class="select" id="pRegion"><option value="all">All regions</option>${Object.values(REGIONS).map((r) => `<option value="${r.code}">${r.name}</option>`).join("")}</select>
         </div><span class="badge" id="pCount">${PLAYERS.length} players</span></div>
-        <div class="grid-3" id="pGrid">${grid}</div>
+        <div class="grid-3" id="pGrid">${grid || emptyState}</div>
       </div>`;
     const apply = () => {
       const q = document.getElementById("pSearch").value.toLowerCase().trim();
       const rg = document.getElementById("pRegion").value;
       const list = PLAYERS.filter((p) => p.name.toLowerCase().includes(q) && (rg === "all" || p.region === rg)).sort((a, b) => a.position - b.position);
       document.getElementById("pCount").textContent = list.length + " players";
-      document.getElementById("pGrid").innerHTML = list.map(playerCard).join("");
+      document.getElementById("pGrid").innerHTML = list.map(playerCard).join("") || emptyState;
       document.querySelectorAll("#pGrid [data-player]").forEach((el) => el.addEventListener("click", () => { const p = PLAYERS.find((x) => String(x.id) === el.dataset.player); if (p) openPlayer(p); }));
     };
     document.getElementById("pSearch").oninput = apply;
     document.getElementById("pRegion").onchange = apply;
     apply();
+    renderDataSourceNote();
+  }
+
+  /* ---------- data source note (Supabase live vs players.js) ---------- */
+  function renderDataSourceNote() {
+    const box = document.getElementById("data-source-note");
+    if (!box) return;
+    const cfg = window.SUPABASE_CONFIG || {};
+    const hasKey = !!(cfg.url && cfg.anonKey);
+    const live = window.MCRANKED_LIVE_ACTIVE === true;
+    let html;
+    if (live) {
+      html = `<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:12px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.35);font-size:13.5px;line-height:1.6;">
+        <span style="font-size:16px;">🟢</span>
+        <div><b>Live data — Supabase</b><br>এই page-এর সব player সরাসরি আপনার Supabase <code>players</code> table থেকে আসছে। Discord bot-এ result দিলে কয়েক সেকেন্ডেই এখানে দেখা যাবে।</div>
+      </div>`;
+    } else if (!hasKey) {
+      html = `<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:12px;background:rgba(234,179,8,.10);border:1px solid rgba(234,179,8,.35);font-size:13.5px;line-height:1.6;">
+        <span style="font-size:16px;">🟡</span>
+        <div><b>Static data — players.js</b><br>Supabase key এখনো বসানো হয়নি, তাই data আসছে <code>players.js</code> ফাইল থেকে।<br>
+        চালু করতে: <code>supabase-config.js</code> খুলে <code>url</code> আর <code>anonKey</code> বসান (Supabase → Project Settings → API Keys → Project URL + <code>sb_publishable_...</code>)।</div>
+      </div>`;
+    } else {
+      html = `<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:12px;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.35);font-size:13.5px;line-height:1.6;">
+        <span style="font-size:16px;">🔴</span>
+        <div><b>Supabase-এ connect করা যায়নি</b><br>Key বসানো আছে কিন্তু data আসেনি। সম্ভাব্য কারণ: <code>players</code> table এখনো তৈরি হয়নি, অথবা key ভুল।<br>
+        সমাধান: Supabase → SQL Editor-এ <code>supabase-setup.sql</code> run করুন, তারপর page reload করুন। (এখন <code>players.js</code> দেখানো হচ্ছে)</div>
+      </div>`;
+    }
+    box.innerHTML = html;
   }
 
   /* ---------- KITS PAGE ---------- */
