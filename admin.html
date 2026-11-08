@@ -18,8 +18,12 @@
     <h1>MCRANCKED</h1>
     <p>Admin Panel</p>
     <div class="field">
+      <label>Email</label>
+      <input id="email" class="input" type="email" placeholder="Admin email" autocomplete="username">
+    </div>
+    <div class="field" style="margin-top:12px">
       <label>Password</label>
-      <input id="password" class="input" type="password" placeholder="Admin password" autocomplete="off">
+      <input id="password" class="input" type="password" placeholder="Admin password" autocomplete="current-password">
     </div>
     <button class="btn primary" style="width:100%;margin-top:12px" onclick="login()">Login</button>
     <div id="loginMsg" class="msg"></div>
@@ -87,9 +91,10 @@ if(cfgOK) supabase=window.supabase.createClient(window.SUPABASE_URL,window.SUPAB
 function msg(id,t){document.getElementById(id).textContent=t}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function id(){return Date.now()}
-async function login(){if(!supabase){msg('loginMsg','First add Supabase URL and anon key in supabase-config.js.');return}const email=prompt('Admin email');if(!email)return;const password=document.getElementById('password').value;const {error}=await supabase.auth.signInWithPassword({email,password});if(error){msg('loginMsg',error.message);return}document.getElementById('loginScreen').classList.add('hidden');document.getElementById('adminScreen').classList.remove('hidden');await loadPlayers();subscribePlayers()}
-async function logout(){if(channel)await supabase.removeChannel(channel);await supabase.auth.signOut();document.getElementById('adminScreen').classList.add('hidden');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('password').value=''}
+async function login(){if(!supabase){msg('loginMsg','First add Supabase URL and publishable key in supabase-config.js.');return}const email=document.getElementById('email').value.trim();const password=document.getElementById('password').value;if(!email||!password){msg('loginMsg','Enter your admin email and password.');return}const {error}=await supabase.auth.signInWithPassword({email,password});if(error){msg('loginMsg',error.message);return}const {data:allowed,error:checkError}=await supabase.rpc('is_admin');if(checkError||allowed!==true){await supabase.auth.signOut();msg('loginMsg','This account is not registered as an admin.');return}document.getElementById('loginScreen').classList.add('hidden');document.getElementById('adminScreen').classList.remove('hidden');await loadPlayers();subscribePlayers()}
+async function logout(){if(channel)await supabase.removeChannel(channel);await supabase.auth.signOut();document.getElementById('adminScreen').classList.add('hidden');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('password').value='';document.getElementById('email').value=''}
 document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+document.getElementById('email').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 async function loadPlayers(){const {data,error}=await supabase.from('players').select('*').order('totalPoints',{ascending:false});if(error){msg('saveMsg',error.message);return}players=(data||[]).map(row=>({...row,skinUrl:row.skinUrl||''}));calculate();renderPlayers()}
 function subscribePlayers(){channel=supabase.channel('shared-player-list').on('postgres_changes',{event:'*',schema:'public',table:'players'},()=>loadPlayers()).subscribe()}
 function buildModeFields(player={}){document.getElementById('modeFields').innerHTML=MODES.map(m=>{const r=player.results?.[m.id]||{},selected=r.tier||'',pts=selected&&r.points!==''&&r.points!=null?r.points:'';return `<div class="modebox"><h3>${m.name}</h3><div class="row"><select id="tier_${m.id}" class="select" onchange="tierChanged('${m.id}')"><option value="">Not Tested</option>${TIERS.filter(Boolean).map(t=>`<option value="${t}" ${selected===t?'selected':''}>${t}</option>`).join('')}</select><input id="points_${m.id}" class="input" type="number" min="0" step="1" placeholder="Points" value="${esc(pts)}"></div></div>`}).join('')}
