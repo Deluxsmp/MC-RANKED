@@ -1,33 +1,18 @@
-MCRANCKED GitHub update bundle
+MCRANCKED — NO PASSWORD + LIVE RANKING
 
-Upload/replace these 3 files in the ROOT of your GitHub repository:
-- admin.html
-- app.js
-- rankings.html
+WHAT THIS VERSION DOES
+- admin.html opens directly. There is NO password box, NO login, and NO Supabase Auth requirement.
+- Add / edit / delete players from the admin page.
+- Player data is stored in the shared Supabase public.players table.
+- The public ranking page refreshes automatically through Supabase Realtime.
 
-IMPORTANT: Do not replace your already-configured supabase-config.js with a blank template. If the repository does not yet contain supabase-config.js, create it in the repository root with your own Project URL and Publishable Key:
+INSTALL
+1. In your website GitHub repository, replace admin.html, app.js, and rankings.html with the files in this ZIP.
+2. Keep your existing supabase-config.js. Do NOT replace it with a blank/example config. It must keep your existing SUPABASE_URL and SUPABASE_ANON_KEY. No admin email or password setting is needed.
+3. Open Supabase Dashboard > SQL Editor. Run supabase-no-password-policies.sql once. This enables anonymous public writes required by the no-login admin page.
+4. Deploy / wait for your website host to finish deploying. Open /admin.html to manage players.
 
-window.SUPABASE_URL = "YOUR_PROJECT_URL";
-window.SUPABASE_ANON_KEY = "YOUR_PUBLISHABLE_KEY";
+IMPORTANT SECURITY NOTE
+Because you requested no password and no login, anyone who knows the admin page URL can add, edit, or delete players. The public Supabase anon key is not a secret, so this cannot be made private with frontend code alone.
 
-Use only the Supabase Publishable key (or legacy anon public key), never a Secret/service_role key.
-
-Keep existing index.html, styles.css, icons.js, logo.js, site-config.js, and all other files. Do not delete repository contents.
-
-After committing, Vercel should deploy automatically if connected to this GitHub repo. Open /admin.html to test.
-
-Admin login requires a Supabase Auth user whose UID is also registered in public.admins. Public rankings read public.players.
-
-PASSWORD-ONLY LOGIN:
-In your existing supabase-config.js, add this line with the email of the existing Supabase admin account:
-window.ADMIN_LOGIN_EMAIL = "YOUR_EXISTING_ADMIN_EMAIL";
-Do not replace your existing Supabase URL/key. The email is stored in config so the login page asks only for a password.
-After login, use "Change Admin Password" inside admin.html to update that account password.
-
-LOGIN SETTINGS:
-- Admin login screen asks for PASSWORD only; it does not ask for an email.
-- Keep your existing supabase-config.js URL and publishable/anon key unchanged.
-- Add this one-time setting to that existing config if it is not already present:
-  window.ADMIN_LOGIN_EMAIL = "YOUR_EXISTING_ADMIN_EMAIL";
-- Supabase Auth must already have this admin account's password set to mcranked@admin. The website cannot change a Supabase Auth password just by editing HTML.
-- Do not publish a real password inside public HTML/JavaScript. This ZIP does not hardcode the password.
+Do not run the old supabase-setup.sql again just for this update. The new SQL file above changes policies only and does not delete existing players.

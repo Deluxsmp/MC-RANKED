@@ -13,39 +13,14 @@
 </head>
 <body>
 
-<div id="loginScreen" class="wrap login">
-  <div class="card">
-    <h1>MCRANCKED</h1>
-    <p>Admin Panel</p>
-    <div class="field">
-      <label>Password</label>
-      <input id="password" class="input" type="password" placeholder="Admin password" autocomplete="current-password">
-    </div>
-    <button class="btn primary" style="width:100%;margin-top:12px" onclick="login()">Login</button>
-    <div id="loginMsg" class="msg"></div>
-  </div>
-</div>
-
-<div id="adminScreen" class="wrap hidden">
+<div id="adminScreen" class="wrap">
   <div class="card">
     <div class="topbar">
       <div>
         <h1>MCRANCKED Admin Panel</h1>
         <p style="margin:0">Manage players, ranks and points.</p>
       </div>
-      <button class="btn" onclick="logout()">Logout</button>
     </div>
-  </div>
-
-  <div class="card">
-    <h2>Change Admin Password</h2>
-    <p class="hint">Set a new password for this admin account. Your next login will use only this password.</p>
-    <div class="grid">
-      <div class="field"><label>New Password</label><input id="newAdminPassword" class="input" type="password" minlength="6" placeholder="At least 6 characters"></div>
-      <div class="field"><label>Confirm New Password</label><input id="confirmAdminPassword" class="input" type="password" minlength="6" placeholder="Confirm new password"></div>
-    </div>
-    <button class="btn primary" style="margin-top:12px" onclick="changeAdminPassword()">Update Password</button>
-    <div id="passwordMsg" class="msg"></div>
   </div>
 
   <div class="card">
@@ -72,7 +47,7 @@
 
   <div class="card">
     <div class="topbar">
-      <div><h2>Players</h2><p style="margin:0">Shared online player database. Changes sync across all admins.</p></div>
+      <div><h2>Players</h2><p style="margin:0">Shared online player database. Changes sync automatically to the public ranking page.</p></div>
       <div id="count" class="status">0 players</div>
     </div>
     <input id="search" class="input" style="margin-top:15px" placeholder="Search player..." oninput="renderPlayers()">
@@ -98,23 +73,20 @@ if(cfgOK) supabase=window.supabase.createClient(window.SUPABASE_URL,window.SUPAB
 function msg(id,t){document.getElementById(id).textContent=t}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function id(){return Date.now()}
-async function login(){if(!supabase){msg('loginMsg','First add Supabase URL and publishable key in supabase-config.js.');return}const email=window.ADMIN_LOGIN_EMAIL||'';const password=document.getElementById('password').value;if(!email){msg('loginMsg','Add ADMIN_LOGIN_EMAIL once in supabase-config.js.');return}if(!password){msg('loginMsg','Enter your admin password.');return}const {error}=await supabase.auth.signInWithPassword({email,password});if(error){msg('loginMsg',error.message);return}const {data:allowed,error:checkError}=await supabase.rpc('is_admin');if(checkError||allowed!==true){await supabase.auth.signOut();msg('loginMsg','This account is not registered as an admin.');return}document.getElementById('loginScreen').classList.add('hidden');document.getElementById('adminScreen').classList.remove('hidden');await loadPlayers();subscribePlayers()}
-async function changeAdminPassword(){const a=document.getElementById('newAdminPassword').value,b=document.getElementById('confirmAdminPassword').value;if(a.length<6){msg('passwordMsg','Password must be at least 6 characters.');return}if(a!==b){msg('passwordMsg','Passwords do not match.');return}const {error}=await supabase.auth.updateUser({password:a});if(error){msg('passwordMsg',error.message);return}document.getElementById('newAdminPassword').value='';document.getElementById('confirmAdminPassword').value='';msg('passwordMsg','Admin password updated successfully.')}
-async function logout(){if(channel)await supabase.removeChannel(channel);await supabase.auth.signOut();document.getElementById('adminScreen').classList.add('hidden');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('password').value=''}
-document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-async function loadPlayers(){const {data,error}=await supabase.from('players').select('*').order('totalPoints',{ascending:false});if(error){msg('saveMsg',error.message);return}players=(data||[]).map(row=>({...row,skinUrl:row.skinUrl||''}));calculate();renderPlayers()}
+// No admin password or Supabase Auth is used. The panel opens directly.
+async function loadPlayers(){if(!supabase){msg('saveMsg','Supabase setup is missing. Keep your existing supabase-config.js URL and anon key.');return}const {data,error}=await supabase.from('players').select('*').order('totalPoints',{ascending:false});if(error){msg('saveMsg',error.message);return}players=(data||[]).map(row=>({...row,skinUrl:row.skinUrl||''}));calculate();renderPlayers()}
 function subscribePlayers(){channel=supabase.channel('shared-player-list').on('postgres_changes',{event:'*',schema:'public',table:'players'},()=>loadPlayers()).subscribe()}
 function buildModeFields(player={}){document.getElementById('modeFields').innerHTML=MODES.map(m=>{const r=player.results?.[m.id]||{},selected=r.tier||'',pts=selected&&r.points!==''&&r.points!=null?r.points:'';return `<div class="modebox"><h3>${m.name}</h3><div class="row"><select id="tier_${m.id}" class="select" onchange="tierChanged('${m.id}')"><option value="">Not Tested</option>${TIERS.filter(Boolean).map(t=>`<option value="${t}" ${selected===t?'selected':''}>${t}</option>`).join('')}</select><input id="points_${m.id}" class="input" type="number" min="0" step="1" placeholder="Points" value="${esc(pts)}"></div></div>`}).join('')}
 function tierChanged(mode){if(!document.getElementById('tier_'+mode).value)document.getElementById('points_'+mode).value=''}
 function getFormPlayer(){const results={};MODES.forEach(m=>{const tier=document.getElementById('tier_'+m.id).value,pv=document.getElementById('points_'+m.id).value.trim();results[m.id]={tier,points:tier&&pv!==''?Number(pv):''}});return {id:Number(document.getElementById('editId').value)||id(),name:document.getElementById('name').value.trim(),region:document.getElementById('region').value,skinUrl:document.getElementById('skin').value.trim(),namemc:document.getElementById('namemc').value.trim(),results}}
 function calculate(){players.forEach(p=>{p.totalPoints=MODES.reduce((sum,m)=>{const v=p.results?.[m.id]?.points;return sum+(v!==''&&v!=null&&!Number.isNaN(Number(v))?Number(v):0)},0)});players.sort((a,b)=>b.totalPoints-a.totalPoints);players.forEach((p,i)=>p.position=i+1)}
-async function savePlayer(){const p=getFormPlayer();if(!p.name){msg('saveMsg','Player name is required.');return}const duplicate=players.find(x=>x.name.toLowerCase()===p.name.toLowerCase()&&x.id!==p.id);if(duplicate)p.id=duplicate.id;const existing=players.find(x=>x.id===p.id);if(existing)p.position=existing.position;calculate();const payload={...p,updated_at:new Date().toISOString()};const {error}=await supabase.from('players').upsert(payload);if(error){msg('saveMsg',error.message);return}msg('saveMsg','Saved online! All admins and the ranking page will sync.');clearForm();await loadPlayers()}
+async function savePlayer(){if(!supabase){msg('saveMsg','Supabase setup is missing.');return}const p=getFormPlayer();if(!p.name){msg('saveMsg','Player name is required.');return}const duplicate=players.find(x=>x.name.toLowerCase()===p.name.toLowerCase()&&x.id!==p.id);if(duplicate)p.id=duplicate.id;const existing=players.find(x=>x.id===p.id);if(existing)p.position=existing.position;calculate();const payload={...p,updated_at:new Date().toISOString()};const {error}=await supabase.from('players').upsert(payload);if(error){msg('saveMsg',error.message);return}msg('saveMsg','Saved online! All admins and the ranking page will sync.');clearForm();await loadPlayers()}
 function editPlayer(pid){const p=players.find(x=>x.id===pid);if(!p)return;document.getElementById('editId').value=p.id;document.getElementById('name').value=p.name||'';document.getElementById('region').value=p.region||'AS';document.getElementById('skin').value=p.skinUrl||'';document.getElementById('namemc').value=p.namemc||'';buildModeFields(p);document.getElementById('formTitle').textContent='Edit Player';scrollTo({top:0,behavior:'smooth'})}
-async function deletePlayer(pid){const p=players.find(x=>x.id===pid);if(!p||!confirm('Delete '+p.name+'?'))return;const {error}=await supabase.from('players').delete().eq('id',pid);if(error){msg('saveMsg',error.message);return}msg('saveMsg','Player deleted.');await loadPlayers()}
+async function deletePlayer(pid){if(!supabase){msg('saveMsg','Supabase setup is missing.');return}const p=players.find(x=>x.id===pid);if(!p||!confirm('Delete '+p.name+'?'))return;const {error}=await supabase.from('players').delete().eq('id',pid);if(error){msg('saveMsg',error.message);return}msg('saveMsg','Player deleted.');await loadPlayers()}
 function clearForm(){document.getElementById('editId').value='';document.getElementById('name').value='';document.getElementById('region').value='AS';document.getElementById('skin').value='';document.getElementById('namemc').value='';buildModeFields();document.getElementById('formTitle').textContent='Add Player'}
 function renderPlayers(){calculate();const q=document.getElementById('search').value.toLowerCase().trim(),list=players.filter(p=>p.name.toLowerCase().includes(q));document.getElementById('count').textContent=players.length+' players';document.getElementById('playerList').innerHTML=list.length?list.map(p=>`<div class="player"><div><div class="playername">#${p.position} ${esc(p.name)}</div><div class="meta">${esc(p.region)} • ${p.totalPoints} points</div></div><div class="actions"><button class="btn" onclick="editPlayer(${p.id})">Edit</button><button class="btn red" onclick="deletePlayer(${p.id})">Delete</button></div></div>`).join(''):'<p style="color:#777">No players found.</p>'}
 buildModeFields();
-if(!cfgOK)msg('loginMsg','Setup required: add your Supabase Project URL and anon key in supabase-config.js.');
+if(!cfgOK){msg('saveMsg','Setup required: add your existing Supabase Project URL and anon key in supabase-config.js.');}else{loadPlayers();subscribePlayers();}
 </script>
 </body>
 </html>
