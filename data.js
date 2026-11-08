@@ -13,9 +13,13 @@
        #2 and #3 -> Combat Master
        everyone else -> Combat Ace
    - Career Stats + Socials removed from the player model.
-   - Kits kept: Vanilla, UHC, Pot, Sword, Axe, Mace, Diamond SMP, SpearMace
+   - Kits kept: Vanilla, UHC, Pot, Sword, Axe, Diamond SMP, SpearMace
    v7 changes (per user request):
    - New kit added: "SpearMace" (replaces the previously removed kit).
+   v8 changes (per user request):
+   - One legacy kit removed everywhere (MODES, ICONS, badge catalog).
+   - Home stat cards are now LIVE metrics derived from the real data
+     (players, kits, tiers, regions, countries, tourneys, news, servers).
    ============================================================ */
 
 /* ---------- SITE CONFIG ---------- */
@@ -35,14 +39,18 @@ const SITE = {
   nextReveal: "2026-11-15T11:00:00-05:00",
   nextRevealLabel: "Sunday \u00b7 November 15 \u00b7 11:00 AM EST",
   announcement: "Player rankings will appear here once players are added.",
-  /* Global stats are derived from real data in app.js (no fake numbers). */
+  /* Global stats are derived from real data in app.js (no fake numbers).
+     v8: live metrics only \u2014 players, kits, tiers, regions, countries,
+     tourneys, news, servers. */
   stats: {
-    playersRanked: 0,
-    testsCompleted: 0,
-    activeTesters: 0,
-    kitsTracked: 0,
-    matchesToday: 0,
-    countries: 0
+    players: 0,
+    kits: 0,
+    tiers: 0,
+    regions: 0,
+    countries: 0,
+    tourneys: 0,
+    news: 0,
+    servers: 0
   }
 };
 
@@ -88,10 +96,10 @@ const RANK_BADGES = [
 ];
 
 /* ---------- MODES / KITS ----------
-   Kept: vanilla, uhc, pot, sword, axe, mace (original)
+   Kept: vanilla, uhc, pot, sword, axe (original)
    Kept new: diamond-smp, spearmace
    Removed: nethop, crystal, spear, early, late, netherite-pot,
-            creeper, end-game, smp, bow, shield
+            creeper, end-game, smp, bow, shield, and one legacy kit
 */
 const MODES = [
   { id: "overall",      n: "Overall",       i: "\ud83c\udfc6", icon: "images/crown.png",  group: "core" },
@@ -100,7 +108,6 @@ const MODES = [
   { id: "pot",          n: "Pot",           i: "\ud83e\uddea", icon: "",                 group: "core" },
   { id: "sword",        n: "Sword",         i: "\ud83d\udde1\ufe0f", icon: "",                 group: "core" },
   { id: "axe",          n: "Axe",           i: "\ud83e\ude93", icon: "",                 group: "core" },
-  { id: "mace",         n: "Mace",          i: "\ud83d\udd28", icon: "",                 group: "core" },
   /* ---- kept new kits ---- */
   { id: "diamond-smp",  n: "Diamond SMP",   i: "\ud83d\udd37", icon: "",                 group: "new" },
   { id: "spearmace",    n: "SpearMace",     i: "\ud83d\udd31", icon: "",                 group: "new" }
@@ -141,11 +148,11 @@ const BADGE_CATALOG = {
   "Rising Star": "#7fb2ff", "Cracked Verified": "#55d98c", "#1 Overall": "#ffd83f",
   "#2 Overall": "#d8e0ea", "#3 Overall": "#d8873d", "Veteran Tester": "#c792ea",
   "Multi-Kit Master": "#ff9c51", "UHC Specialist": "#ff647c",
-  "Mace Main": "#ffa94d", "Vanilla Specialist": "#9fb0c6",
+  "Vanilla Specialist": "#9fb0c6",
   "Tester": "#c792ea", "All-Rounder": "#7fb2ff", "Pot Threat": "#ff9c51",
   "Aggressive Duelist": "#ff647c", "Pot Main": "#ff9c51",
   "Grinder": "#9fb0c6", "Oceania Top": "#4dd0e1", "Duelist": "#9fb0c6",
-  "Sword Grinder": "#9fb0c6", "Sword Main": "#9fb0c6", "Mace Specialist": "#ffa94d"
+  "Sword Grinder": "#9fb0c6", "Sword Main": "#9fb0c6"
 };
 
 /* ---------- ICONS (only kept kits) ---------- */
@@ -156,7 +163,6 @@ const ICONS = {
   pot: "https://www.mctiers.it/modes/diapot.svg",
   sword: "https://www.mctiers.it/modes/sword.svg",
   axe: "https://tiermaker.com/images/media/template_images/2024/18026725/all-marlow-mctiers-and-subtiers-pvp-gamemodes-18026725/axe.png",
-  mace: "https://tiermaker.com/images/media/template_images/2024/18026725/all-marlow-mctiers-and-subtiers-pvp-gamemodes-18026725/mace.png",
   "diamond-smp": "https://www.mctiers.it/modes/diasmp.svg",
   spearmace: "https://www.mctiers.it/modes/spearmace.svg"
 };

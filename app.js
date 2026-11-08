@@ -6,6 +6,9 @@
        MT / ST tier references removed (only HT1-HT5 + LT1-LT5).
        Kill / Death / Win Rate fields removed everywhere.
        Home page fully redesigned (premium esports look).
+   v8: one legacy kit removed. Home stat cards are now LIVE metrics
+       derived from the real data (players, kits, tiers, regions,
+       countries, tourneys, news, servers). Home page polished.
    v3: SMP / Bow / Shield kits removed. Admin links removed from
        public pages. Players / Tourneys / News / Servers show
        empty states. Stats are derived from real data.
@@ -65,18 +68,17 @@
 
   /* ---------- derived stats (real data only) ---------- */
   function derivedStats() {
-    const tested = MODES.filter((m) => m.id !== "overall");
-    let tests = 0;
-    PLAYERS.forEach((p) => tested.forEach((m) => { if (isTested(result(p, m.id))) tests++; }));
-    const testers = PLAYERS.filter((p) => p.tester).length;
+    const kits = MODES.filter((m) => m.id !== "overall");
     const countries = new Set(PLAYERS.map((p) => p.country).filter(Boolean)).size;
     return {
-      playersRanked: PLAYERS.length,
-      testsCompleted: tests,
-      activeTesters: testers,
-      kitsTracked: tested.length,
-      matchesToday: 0,
-      countries
+      players: PLAYERS.length,
+      kits: kits.length,
+      tiers: TIER_DEFS.length,
+      regions: Object.keys(REGIONS).length,
+      countries,
+      tourneys: (D.TOURNEYS || []).length,
+      news: (D.NEWS || []).length,
+      servers: (D.SERVER_REGIONS || []).length
     };
   }
 
@@ -202,10 +204,11 @@
     const rest = sorted.slice(3, 8);
     const st = derivedStats();
     const statCards = [
-      ["playersRanked", "Players Ranked"], ["testsCompleted", "Tests Completed"],
-      ["activeTesters", "Active Testers"], ["kitsTracked", "Kits Tracked"],
-      ["matchesToday", "Matches Today"], ["countries", "Countries"]
-    ].map(([k, l]) => `<div class="home-stat"><div class="hs-value">${(st[k] ?? 0).toLocaleString()}</div><div class="hs-label">${l}</div></div>`).join("");
+      ["players", "Total Players", "\ud83d\udc65"], ["kits", "Kits & Modes", "\ud83c\udfae"],
+      ["tiers", "Tiers", "\ud83c\udfc6"], ["regions", "Regions", "\ud83c\udf0d"],
+      ["countries", "Countries", "\ud83c\udff3\ufe0f"], ["tourneys", "Tourneys", "\ud83c\udfc5"],
+      ["news", "News Posts", "\ud83d\udcf0"], ["servers", "Servers", "\ud83c\udf10"]
+    ].map(([k, l, ic]) => `<div class="home-stat"><span class="hs-icon">${ic}</span><div class="hs-value">${(st[k] ?? 0).toLocaleString()}</div><div class="hs-label">${l}</div></div>`).join("");
 
     const podium = top.length ? top.map((p, i) => {
       const cls = ["first", "second", "third"][i];
@@ -219,7 +222,7 @@
     }).join("") : "";
 
     const rows = rest.map((p) => {
-      const chips = ["vanilla", "uhc", "pot", "sword", "axe", "mace"].map((id) => {
+      const chips = ["vanilla", "uhc", "pot", "sword", "axe"].map((id) => {
         const r = result(p, id); const mo = modeById(id);
         if (!isTested(r)) return "";
         return `<span class="kit-chip">${iconHTML(mo, "mini-icon-img")}<span class="tier-label ${tierClass(r.tier)}">${esc(r.tier)}</span></span>`;
@@ -232,6 +235,15 @@
         <div class="kit-chips">${chips}</div>
         <div class="points-cell">${p.totalPoints}<small>points</small></div>
       </div>`;
+    }).join("");
+
+    const kitCards = MODES.filter((m) => m.id !== "overall").map((m) => {
+      const count = PLAYERS.filter((p) => isTested(result(p, m.id))).length;
+      return `<a class="home-kit" href="kits.html">
+        <span class="home-kit-icon">${iconHTML(m, "home-kit-img")}</span>
+        <span class="home-kit-name">${esc(m.n)}</span>
+        <span class="home-kit-count">${count} ranked</span>
+      </a>`;
     }).join("");
 
     const leaderboardBlock = `<div class="home-podium">${podium}</div>
@@ -277,7 +289,11 @@
         </div>
       </section>
 
-      <section class="section"><div class="wrap">
+      <section class="section home-stats-section"><div class="wrap">
+        <div class="section-head">
+          <div><p class="eyebrow">Live Network</p><h2 class="section-title">MCRANKED at a glance</h2>
+            <p class="section-sub">Live counts, calculated automatically from the site data \u2014 add or remove anything in the admin panels and these update themselves.</p></div>
+        </div>
         <div class="home-stats">${statCards}</div>
       </div></section>
 
@@ -290,6 +306,17 @@
           <a class="btn btn-ghost btn-sm" href="tiers.html">Full Leaderboard →</a>
         </div>
         ${leaderboardBlock}
+      </div></section>
+
+      <div class="wrap"><div class="divider"></div></div>
+
+      <section class="section"><div class="wrap">
+        <div class="section-head">
+          <div><p class="eyebrow">Gamemodes</p><h2 class="section-title">Kits &amp; Modes</h2>
+            <p class="section-sub">Every kit we rank players in. Counts update live as players are added.</p></div>
+          <a class="btn btn-ghost btn-sm" href="kits.html">All Kits \u2192</a>
+        </div>
+        <div class="home-kits">${kitCards}</div>
       </div></section>
 
       <div class="wrap"><div class="divider"></div></div>
