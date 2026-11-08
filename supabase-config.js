@@ -15,5 +15,5 @@
    ============================================================ */
 
 window.SUPABASE_URL = "";       // e.g. "https://abcdefgh.supabase.co"
-window.SUPABASE_ANON_KEY = "";  // e.g. "sb_publishable_xxxxxxxxxxxx"
+window.SUPABASE_ANON_KEY = "sb_publishable_jfblKYZ58C4ica4SZX2Lig_EFtxmV7G";  // e.g. "sb_publishable_xxxxxxxxxxxx"
 window.SUPABASE_TABLE = "players";
