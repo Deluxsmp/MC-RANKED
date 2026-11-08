@@ -1,51 +1,9 @@
 /* =====================================================
-   MCRANCKED — PLAYER DATA
-   Generated from Admin Panel
-   Replace ONLY your old players.js with this file.
+   MCRANKED — PLAYER DATA
+   Generated from Admin Panel (admin.html → Download players.js)
+   Replace ONLY this file with the one you download from the admin panel.
+   The site loads this file before data.js, which merges MCRANKED_PLAYERS
+   into the live leaderboard, tiers, players and kits pages.
 ====================================================== */
 
-const MCRANCKED_PLAYERS = [
-  {
-    "id": 1794110612058,
-    "name": "Itz_Dhrubo",
-    "region": "AS",
-    "skinUrl": "",
-    "namemc": "",
-    "results": {
-      "vanilla": {
-        "tier": "LT5",
-        "points": 5
-      },
-      "uhc": {
-        "tier": "",
-        "points": ""
-      },
-      "pot": {
-        "tier": "",
-        "points": ""
-      },
-      "nethop": {
-        "tier": "",
-        "points": ""
-      },
-      "smp": {
-        "tier": "",
-        "points": ""
-      },
-      "sword": {
-        "tier": "",
-        "points": ""
-      },
-      "axe": {
-        "tier": "",
-        "points": ""
-      },
-      "mace": {
-        "tier": "",
-        "points": ""
-      }
-    },
-    "totalPoints": 5,
-    "position": 1
-  }
-];
+const MCRANKED_PLAYERS = [];
