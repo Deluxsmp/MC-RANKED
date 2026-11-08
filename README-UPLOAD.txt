@@ -17,3 +17,9 @@ Keep existing index.html, styles.css, icons.js, logo.js, site-config.js, and all
 After committing, Vercel should deploy automatically if connected to this GitHub repo. Open /admin.html to test.
 
 Admin login requires a Supabase Auth user whose UID is also registered in public.admins. Public rankings read public.players.
+
+PASSWORD-ONLY LOGIN:
+In your existing supabase-config.js, add this line with the email of the existing Supabase admin account:
+window.ADMIN_LOGIN_EMAIL = "YOUR_EXISTING_ADMIN_EMAIL";
+Do not replace your existing Supabase URL/key. The email is stored in config so the login page asks only for a password.
+After login, use "Change Admin Password" inside admin.html to update that account password.
