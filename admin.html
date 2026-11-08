@@ -13,19 +13,33 @@
 </head>
 <body>
 
-<div id="adminScreen" class="wrap">
+<div id="loginScreen" class="wrap login">
+  <div class="card">
+    <h1>MCRANCKED</h1>
+    <p>Admin Panel</p>
+    <div class="field">
+      <label>Password</label>
+      <input id="password" class="input" type="password" placeholder="Admin password" autocomplete="off">
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="login()">Login</button>
+    <div id="loginMsg" class="msg"></div>
+  </div>
+</div>
+
+<div id="adminScreen" class="wrap hidden">
   <div class="card">
     <div class="topbar">
       <div>
         <h1>MCRANCKED Admin Panel</h1>
         <p style="margin:0">Manage players, ranks and points.</p>
       </div>
+      <button class="btn" onclick="logout()">Logout</button>
     </div>
   </div>
 
   <div class="card">
     <h2 id="formTitle">Add Player</h2>
-    <p class="hint">Choose “MT” when a player has no rank in that gamemode. The public ranking will show MT.</p>
+    <p class="hint">Choose “Not Tested” when a player has no rank in that mode. The ranking box will stay empty on the public site.</p>
     <input id="editId" type="hidden">
 
     <div class="grid">
@@ -47,7 +61,7 @@
 
   <div class="card">
     <div class="topbar">
-      <div><h2>Players</h2><p style="margin:0">Shared online player database. Changes sync automatically to the public ranking page.</p></div>
+      <div><h2>Players</h2><p style="margin:0">Existing player data loaded from players.js/local storage.</p></div>
       <div id="count" class="status">0 players</div>
     </div>
     <input id="search" class="input" style="margin-top:15px" placeholder="Search player..." oninput="renderPlayers()">
@@ -62,31 +76,184 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+<script src="players.js"></script>
 <script>
-const MODES=[{id:'vanilla',name:'Vanilla'},{id:'uhc',name:'UHC'},{id:'pot',name:'Pot'},{id:'nethop',name:'NetHop'},{id:'smp',name:'SMP'},{id:'sword',name:'Sword'},{id:'axe',name:'Axe'},{id:'mace',name:'Mace'}];
-const TIERS=['MT','HT1','LT1','HT2','LT2','HT3','LT3','HT4','LT4','HT5','LT5'];
-let players=[]; let supabase=null; let channel=null;
-const cfgOK=window.SUPABASE_URL && !window.SUPABASE_URL.startsWith('PASTE_') && window.SUPABASE_ANON_KEY && !window.SUPABASE_ANON_KEY.startsWith('PASTE_');
-if(cfgOK) supabase=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
-function msg(id,t){document.getElementById(id).textContent=t}
+/* =========================
+   MCRANCKED ADMIN CONFIG
+========================= */
+const ADMIN_PASSWORD = "mcranked@admin1";
+
+const MODES = [
+  {id:'vanilla', name:'Vanilla'},
+  {id:'uhc', name:'UHC'},
+  {id:'pot', name:'Pot'},
+  {id:'nethop', name:'NetHop'},
+  {id:'smp', name:'SMP'},
+  {id:'sword', name:'Sword'},
+  {id:'axe', name:'Axe'},
+  {id:'mace', name:'Mace'}
+];
+
+const TIERS = ['', 'HT1','LT1','HT2','LT2','HT3','LT3','HT4','LT4','HT5','LT5'];
+
+function safeJSON(value){
+  try{return JSON.parse(value)}catch{return []}
+}
+
+// Start with a clean player database. Old admin/localStorage player data is intentionally cleared.
+localStorage.removeItem('vortexAdminPlayers');
+let players = [];
+
+function saveLocal(){
+  localStorage.setItem('vortexAdminPlayers',JSON.stringify(players));
+}
+
+function login(){
+  if(document.getElementById('password').value===ADMIN_PASSWORD){
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminScreen').classList.remove('hidden');
+    renderPlayers();
+  }else document.getElementById('loginMsg').textContent='Incorrect password.';
+}
+function logout(){
+  document.getElementById('adminScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('password').value='';
+}
+
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-function id(){return Date.now()}
-// No admin password or Supabase Auth is used. The panel opens directly.
-async function loadPlayers(){if(!supabase){msg('saveMsg','Supabase setup is missing. Keep your existing supabase-config.js URL and anon key.');return}const {data,error}=await supabase.from('players').select('*').order('totalPoints',{ascending:false});if(error){msg('saveMsg',error.message);return}players=(data||[]).map(row=>({...row,skinUrl:row.skinUrl||''}));calculate();renderPlayers()}
-function subscribePlayers(){channel=supabase.channel('shared-player-list').on('postgres_changes',{event:'*',schema:'public',table:'players'},()=>loadPlayers()).subscribe()}
-function buildModeFields(player={}){document.getElementById('modeFields').innerHTML=MODES.map(m=>{const r=player.results?.[m.id]||{},selected=r.tier||'MT',pts=selected!=='MT'&&r.points!==''&&r.points!=null?r.points:'';return `<div class="modebox"><h3>${m.name}</h3><div class="row"><select id="tier_${m.id}" class="select" onchange="tierChanged('${m.id}')">${TIERS.map(t=>`<option value="${t}" ${selected===t?'selected':''}>${t}</option>`).join('')}</select><input id="points_${m.id}" class="input" type="number" min="0" step="1" placeholder="Points" value="${esc(pts)}"></div></div>`}).join('')}
-function tierChanged(mode){if(document.getElementById('tier_'+mode).value==='MT')document.getElementById('points_'+mode).value=''}
-function getFormPlayer(){const results={};MODES.forEach(m=>{const tier=document.getElementById('tier_'+m.id).value,pv=document.getElementById('points_'+m.id).value.trim();results[m.id]={tier,points:tier!=='MT'&&pv!==''?Number(pv):''}});return {id:Number(document.getElementById('editId').value)||id(),name:document.getElementById('name').value.trim(),region:document.getElementById('region').value,skinUrl:document.getElementById('skin').value.trim(),namemc:document.getElementById('namemc').value.trim(),results}}
-function calculate(){players.forEach(p=>{p.totalPoints=MODES.reduce((sum,m)=>{const v=p.results?.[m.id]?.points;return sum+(v!==''&&v!=null&&!Number.isNaN(Number(v))?Number(v):0)},0)});players.sort((a,b)=>b.totalPoints-a.totalPoints);players.forEach((p,i)=>p.position=i+1)}
-async function savePlayer(){if(!supabase){msg('saveMsg','Supabase setup is missing.');return}const p=getFormPlayer();if(!p.name){msg('saveMsg','Player name is required.');return}const duplicate=players.find(x=>x.name.toLowerCase()===p.name.toLowerCase()&&x.id!==p.id);if(duplicate)p.id=duplicate.id;const existing=players.find(x=>x.id===p.id);if(existing)p.position=existing.position;calculate();const payload={...p,updated_at:new Date().toISOString()};const {error}=await supabase.from('players').upsert(payload);if(error){msg('saveMsg',error.message);return}msg('saveMsg','Saved online! All admins and the ranking page will sync.');clearForm();await loadPlayers()}
-function editPlayer(pid){const p=players.find(x=>x.id===pid);if(!p)return;document.getElementById('editId').value=p.id;document.getElementById('name').value=p.name||'';document.getElementById('region').value=p.region||'AS';document.getElementById('skin').value=p.skinUrl||'';document.getElementById('namemc').value=p.namemc||'';buildModeFields(p);document.getElementById('formTitle').textContent='Edit Player';scrollTo({top:0,behavior:'smooth'})}
-async function deletePlayer(pid){if(!supabase){msg('saveMsg','Supabase setup is missing.');return}const p=players.find(x=>x.id===pid);if(!p||!confirm('Delete '+p.name+'?'))return;const {error}=await supabase.from('players').delete().eq('id',pid);if(error){msg('saveMsg',error.message);return}msg('saveMsg','Player deleted.');await loadPlayers()}
-function clearForm(){document.getElementById('editId').value='';document.getElementById('name').value='';document.getElementById('region').value='AS';document.getElementById('skin').value='';document.getElementById('namemc').value='';buildModeFields();document.getElementById('formTitle').textContent='Add Player'}
-function renderPlayers(){calculate();const q=document.getElementById('search').value.toLowerCase().trim(),list=players.filter(p=>p.name.toLowerCase().includes(q));document.getElementById('count').textContent=players.length+' players';document.getElementById('playerList').innerHTML=list.length?list.map(p=>`<div class="player"><div><div class="playername">#${p.position} ${esc(p.name)}</div><div class="meta">${esc(p.region)} • ${p.totalPoints} points</div></div><div class="actions"><button class="btn" onclick="editPlayer(${p.id})">Edit</button><button class="btn red" onclick="deletePlayer(${p.id})">Delete</button></div></div>`).join(''):'<p style="color:#777">No players found.</p>'}
+function id(){return Date.now()+Math.floor(Math.random()*100000)}
+function pointsValue(v){return v===''||v===null||v===undefined?'':Number(v)}
+
+function buildModeFields(player={}){
+  document.getElementById('modeFields').innerHTML=MODES.map(m=>{
+    const r=player.results?.[m.id]||{};
+    const selected=r.tier||'';
+    const pts=(selected && r.points!=='' && r.points!==undefined && r.points!==null)?r.points:'';
+    return `<div class="modebox">
+      <h3>${m.name}</h3>
+      <div class="row">
+        <select id="tier_${m.id}" class="select" onchange="tierChanged('${m.id}')">
+          <option value="">Not Tested</option>
+          ${TIERS.filter(Boolean).map(t=>`<option value="${t}" ${selected===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+        <input id="points_${m.id}" class="input" type="number" min="0" step="1" placeholder="Points" value="${esc(pts)}">
+      </div>
+      <label class="check"><input id="auto_${m.id}" type="checkbox"> Keep points empty when Not Tested</label>
+    </div>`;
+  }).join('');
+}
+
+function tierChanged(mode){
+  const tier=document.getElementById('tier_'+mode).value;
+  const points=document.getElementById('points_'+mode);
+  if(!tier) points.value='';
+}
+
+function getFormPlayer(){
+  const results={};
+  MODES.forEach(m=>{
+    const tier=document.getElementById('tier_'+m.id).value;
+    const pv=document.getElementById('points_'+m.id).value.trim();
+    results[m.id]={tier:tier,points:tier&&pv!==''?Number(pv):''};
+  });
+  return {
+    id:document.getElementById('editId').value?Number(document.getElementById('editId').value):id(),
+    name:document.getElementById('name').value.trim(),
+    region:document.getElementById('region').value,
+    skinUrl:document.getElementById('skin').value.trim(),
+    namemc:document.getElementById('namemc').value.trim(),
+    results
+  };
+}
+
+function calculate(){
+  players.forEach(p=>{
+    let total=0;
+    MODES.forEach(m=>{
+      const r=p.results?.[m.id];
+      if(r && r.points!=='' && r.points!==null && r.points!==undefined && !Number.isNaN(Number(r.points))) total+=Number(r.points);
+    });
+    p.totalPoints=total;
+  });
+  players.sort((a,b)=>(b.totalPoints||0)-(a.totalPoints||0));
+  players.forEach((p,i)=>p.position=i+1);
+}
+
+function savePlayer(){
+  const p=getFormPlayer();
+  if(!p.name){document.getElementById('saveMsg').textContent='Player name is required.';return}
+
+  const same=players.findIndex(x=>x.name.toLowerCase()===p.name.toLowerCase());
+  const editing=players.findIndex(x=>x.id===p.id);
+
+  if(same!==-1 && same!==editing){
+    p.id=players[same].id;
+    players[same]=p;
+  }else if(editing!==-1){
+    players[editing]=p;
+  }else players.push(p);
+
+  calculate();
+  saveLocal();
+  document.getElementById('saveMsg').textContent='Player saved. Download players.js when ready.';
+  clearForm();
+  renderPlayers();
+}
+
+function editPlayer(pid){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  document.getElementById('editId').value=p.id;
+  document.getElementById('name').value=p.name||'';
+  document.getElementById('region').value=p.region||'AS';
+  document.getElementById('skin').value=p.skinUrl||'';
+  document.getElementById('namemc').value=p.namemc||'';
+  buildModeFields(p);
+  document.getElementById('formTitle').textContent='Edit Player';
+  scrollTo({top:0,behavior:'smooth'});
+}
+
+function deletePlayer(pid){
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  if(!confirm('Delete '+p.name+'?'))return;
+  players=players.filter(x=>x.id!==pid);
+  calculate();saveLocal();renderPlayers();
+}
+
+function clearForm(){
+  document.getElementById('editId').value='';
+  document.getElementById('name').value='';
+  document.getElementById('region').value='AS';
+  document.getElementById('skin').value='';
+  document.getElementById('namemc').value='';
+  buildModeFields();
+  document.getElementById('formTitle').textContent='Add Player';
+}
+
+function renderPlayers(){
+  calculate();
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  const list=players.filter(p=>p.name.toLowerCase().includes(q));
+  document.getElementById('count').textContent=players.length+' player'+(players.length===1?'':'s');
+  document.getElementById('playerList').innerHTML=list.length?list.map(p=>`<div class="player">
+    <div><div class="playername">#${p.position||'-'} ${esc(p.name)}</div><div class="meta">${esc(p.region||'')} • ${p.totalPoints||0} points</div></div>
+    <div class="actions"><button class="btn" onclick="editPlayer(${p.id})">Edit</button><button class="btn red" onclick="deletePlayer(${p.id})">Delete</button></div>
+  </div>`).join(''):'<p style="color:#777">No players found.</p>';
+}
+
+function downloadPlayersJS(){
+  calculate();saveLocal();
+  const output = `/* =====================================================\n   MCRANCKED — PLAYER DATA\n   Generated from Admin Panel\n   Replace ONLY your old players.js with this file.\n====================================================== */\n\nconst MCRANCKED_PLAYERS = ${JSON.stringify(players,null,2)};\n`;
+  const blob=new Blob([output],{type:'application/javascript;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='players.js';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  document.getElementById('downloadMsg').textContent='players.js downloaded. Replace only players.js on your website.';
+}
+
 buildModeFields();
-if(!cfgOK){msg('saveMsg','Setup required: add your existing Supabase Project URL and anon key in supabase-config.js.');}else{loadPlayers();subscribePlayers();}
 </script>
 </body>
 </html>
