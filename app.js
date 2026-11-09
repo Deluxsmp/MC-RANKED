@@ -453,25 +453,44 @@
     count.textContent = arr.length + " player" + (arr.length === 1 ? "" : "s");
 
     if (tiersState.mode === "overall") {
+      /* v14: mcpvp.com/tiers-style rows.
+         Each row is a card: rank block on the left, a LARGE circular skin,
+         name + overall tier/points, a strip of kit tiles with their tier tag,
+         and the region flag on the right. */
+      const kitModes = MODES.filter((m) => m.id !== "overall");
       const rows = arr.map((p, i) => {
         const pos = i + 1;
-        const chips = MODES.filter((m) => m.id !== "overall").map((mo) => {
+        const ot = overallTier(p);
+        const od = tierDef(ot);
+        const tiles = kitModes.map((mo) => {
           const r = result(p, mo.id);
-          if (!isTested(r)) return "";
-          return `<span class="kit-chip">${iconHTML(mo, "mini-icon-img")}<span class="tier-label ${tierClass(r.tier)}">${esc(r.tier)}</span></span>`;
+          const tested = isTested(r);
+          const td = tested ? tierDef(r.tier) : null;
+          return `<div class="tr-kit${tested ? "" : " tr-kit-empty"}" title="${esc(mo.n)}${tested ? " \u00b7 " + esc(r.tier) : " \u00b7 not tested"}">
+            <span class="tr-kit-ico">${iconHTML(mo)}</span>
+            <span class="tr-kit-tag"${tested ? ` style="color:${td.color};background:${td.bg};border-color:${td.color}55"` : ""}>${tested ? esc(r.tier) : "???"}</span>
+          </div>`;
         }).join("");
-        return `<div class="board-row rank-${pos}" data-player="${p.id}">
-          <div class="pos">${pos}</div>
-          <div class="p-cell"><img class="p-avatar" src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)">
-            <div><div class="p-name">${esc(p.name)}</div><div class="p-meta">${badgeChip(pos, "rank-badge-sm")} ${esc(p.country || "")}</div></div></div>
-          <div class="region-badge">${regionFlag(p.region)} ${esc(p.region)}</div>
-          <div class="kit-chips">${chips}</div>
-          <div class="points-cell">${p.totalPoints}<small>points</small></div>
+        return `<div class="tr-card rank-${pos}" data-player="${p.id}">
+          <div class="tr-rank">${pos}</div>
+          <div class="tr-main">
+            <div class="tr-ava"><img class="tr-skin skin-full" src="${esc(skinUrl(p))}" alt="${esc(p.name)}" onerror="skinFallback(this)"></div>
+            <div class="tr-info">
+              <div class="tr-name">${esc(p.name)}<span class="tr-arrow">\u2192</span></div>
+              <div class="tr-sub">${esc(od.label)} <span class="tr-pts">(${p.totalPoints} Points)</span></div>
+              <div class="tr-kits">${tiles}</div>
+            </div>
+          </div>
+          <div class="tr-flag" title="${esc(regionName(p.region))}">${regionFlag(p.region)}</div>
         </div>`;
       }).join("");
-      board.innerHTML = `<div class="board">
-        <div class="board-head"><span>#</span><span>Player</span><span>Country</span><span>Contributing Kits</span><span style="text-align:right">Points</span></div>
-        ${rows}</div>`;
+      board.innerHTML = rows
+        ? `<div class="tr-list">${rows}</div>`
+        : emptyState({
+            icon: "\ud83c\udfc6",
+            title: "No players ranked yet",
+            text: "Player tiers will appear here as soon as the first player is added. Add players from the admin panel or let the Discord bot post a result."
+          });
     } else {
       const buckets = { 1: [], 2: [], 3: [], 4: [], 5: [] };
       arr.forEach((p) => { const r = result(p, tiersState.mode); const n = tierNum(r && r.tier); if (n) buckets[n].push(p); });

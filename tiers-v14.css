@@ -1,0 +1,161 @@
+/* ============================================================
+   MCRANKED v14 — TIERS PAGE (mcpvp.com/tiers style rows)
+   ------------------------------------------------------------
+   Each player row is a standalone card:
+     [rank block] [ LARGE circular skin ] [ name + tier/points + kit tiles ] [ flag ]
+   Only layout/styling — no data changes.
+   ============================================================ */
+
+.tr-list{display:flex;flex-direction:column;gap:12px}
+
+.tr-card{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  position:relative;
+  background:linear-gradient(180deg,#12161f,#0d1118);
+  border:1px solid rgba(190,148,84,.34);
+  border-radius:16px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.tr-card:hover{
+  border-color:rgba(226,178,98,.72);
+  transform:translateY(-2px);
+  box-shadow:0 14px 34px rgba(0,0,0,.5);
+  background:linear-gradient(180deg,#171c26,#10151d);
+}
+
+/* ---- rank block (left, solid colour) ---- */
+.tr-rank{
+  flex:0 0 78px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:27px;font-weight:900;font-style:italic;
+  color:#2a1c08;
+  background:linear-gradient(180deg,#c98a3c,#a96a25);
+  letter-spacing:-.5px;
+  text-shadow:0 1px 0 rgba(255,255,255,.22);
+  border-right:1px solid rgba(0,0,0,.35);
+}
+.tr-card.rank-1 .tr-rank{background:linear-gradient(180deg,#f2cc4f,#c99a1c);color:#2b2100}
+.tr-card.rank-2 .tr-rank{background:linear-gradient(180deg,#d3dae5,#9aa6b6);color:#1d232c}
+.tr-card.rank-3 .tr-rank{background:linear-gradient(180deg,#d99a5d,#b0703a);color:#2b1808}
+
+/* ---- main area ---- */
+.tr-main{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:17px 20px;
+  min-width:0;
+}
+
+/* ---- LARGE circular skin ---- */
+.tr-ava{
+  flex:0 0 104px;
+  width:104px;height:104px;
+  border-radius:50%;
+  overflow:hidden;
+  display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 32%,#2b3444 0%,#161c26 70%);
+  border:2px solid rgba(190,148,84,.5);
+  box-shadow:0 0 0 1px rgba(0,0,0,.55) inset,0 8px 20px rgba(0,0,0,.55);
+  position:relative;
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.tr-card:hover .tr-ava{border-color:rgba(232,186,110,.9);box-shadow:0 0 0 1px rgba(0,0,0,.55) inset,0 10px 26px rgba(0,0,0,.6),0 0 18px rgba(226,178,98,.28)}
+.tr-ava .tr-skin{
+  width:100%;height:100%;
+  object-fit:contain;
+  object-position:center center;
+  image-rendering:auto;
+  transform:scale(1.06);
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.6));
+}
+
+/* ---- name / sub / kits ---- */
+.tr-info{min-width:0;flex:1}
+.tr-name{
+  font-size:19px;font-weight:800;color:#fff;
+  display:flex;align-items:center;gap:9px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tr-arrow{font-size:15px;color:rgba(255,255,255,.35);font-weight:700;transition:transform .18s ease,color .18s ease}
+.tr-card:hover .tr-arrow{transform:translateX(4px);color:rgba(232,186,110,.95)}
+.tr-sub{
+  margin-top:3px;
+  font-size:12.5px;font-weight:700;
+  color:rgba(226,178,98,.92);
+  letter-spacing:.2px;
+}
+.tr-sub .tr-pts{color:rgba(255,255,255,.55);font-weight:700}
+
+/* ---- kit tile strip ---- */
+.tr-kits{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.tr-kit{
+  width:46px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:6px 4px 5px;
+  border-radius:8px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.09);
+  transition:background .15s ease,border-color .15s ease;
+}
+.tr-card:hover .tr-kit{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14)}
+.tr-kit-ico{display:grid;place-items:center;width:22px;height:22px}
+.tr-kit-ico img{width:22px;height:22px;object-fit:contain}
+.tr-kit-ico .icon-fallback{font-size:16px;line-height:1;filter:grayscale(.15)}
+.tr-kit-tag{
+  font-size:9.5px;font-weight:900;line-height:1;
+  padding:2.5px 5px;border-radius:4px;
+  background:#232c39;border:1px solid rgba(255,255,255,.1);
+  color:#8b98ab;
+  white-space:nowrap;
+}
+.tr-kit-empty{opacity:.42;filter:grayscale(.6)}
+.tr-kit-empty .tr-kit-tag{color:#6b7688}
+
+/* ---- right flag ---- */
+.tr-flag{
+  flex:0 0 66px;
+  display:grid;place-items:center;
+  font-size:26px;
+  line-height:1;
+  border-left:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.018);
+}
+
+/* ---- responsive ---- */
+@media(max-width:880px){
+  .tr-rank{flex:0 0 56px;font-size:21px}
+  .tr-ava{flex:0 0 80px;width:80px;height:80px}
+  .tr-name{font-size:17px}
+  .tr-kit{width:40px}
+}
+@media(max-width:640px){
+  .tr-card{flex-wrap:wrap}
+  .tr-rank{flex:0 0 46px;font-size:18px;align-self:stretch}
+  .tr-main{padding:13px 13px;gap:13px;flex:1 1 100%}
+  .tr-ava{flex:0 0 68px;width:68px;height:68px}
+  .tr-ava .tr-skin{transform:scale(1.04)}
+  .tr-name{font-size:15.5px}
+  .tr-sub{font-size:11.5px}
+  .tr-kits{gap:5px;margin-top:9px}
+  .tr-kit{width:36px;padding:5px 3px 4px}
+  .tr-kit-ico,.tr-kit-ico img{width:18px;height:18px}
+  .tr-kit-tag{font-size:8.5px;padding:2px 4px}
+  .tr-flag{flex:1 1 100%;border-left:0;border-top:1px solid rgba(255,255,255,.06);font-size:18px;padding:5px 0;background:transparent}
+}
+
+/* ---- also enlarge skins in the per-kit tier columns (mode view) ---- */
+.tier-player{padding:15px 14px 17px;gap:13px}
+.tier-player .tier-skin{
+  width:84px;height:84px;flex:0 0 84px;
+  object-fit:contain;object-position:center center;
+  border-radius:12px;
+  background:#161c26;
+  border:1px solid rgba(255,255,255,.1);
+}
+.tier-player .name{font-size:14.5px;font-weight:800}
