@@ -1,9 +1,182 @@
 /* =====================================================
    MCRANKED — PLAYER DATA
-   Generated from Admin Panel (admin.html → Download players.js)
-   Replace ONLY this file with the one you download from the admin panel.
-   The site loads this file before data.js, which merges MCRANKED_PLAYERS
-   into the live leaderboard, tiers, players and kits pages.
+   Generated from Admin Panel
+   Replace ONLY your old players.js with this file.
 ====================================================== */
 
-const MCRANKED_PLAYERS = [];
+const MCRANKED_PLAYERS = [
+  {
+    "id": 1794163160422,
+    "name": "DhruxMC",
+    "region": "AS",
+    "skinUrl": "",
+    "namemc": "",
+    "results": {
+      "vanilla": {
+        "tier": "LT3",
+        "points": 99
+      },
+      "uhc": {
+        "tier": "",
+        "points": ""
+      },
+      "pot": {
+        "tier": "",
+        "points": ""
+      },
+      "sword": {
+        "tier": "",
+        "points": ""
+      },
+      "axe": {
+        "tier": "",
+        "points": ""
+      },
+      "nethpot": {
+        "tier": "",
+        "points": ""
+      },
+      "diamond-smp": {
+        "tier": "",
+        "points": ""
+      },
+      "spearmace": {
+        "tier": "",
+        "points": ""
+      }
+    },
+    "uuid": "",
+    "country": "",
+    "countryCode": "",
+    "flag": "",
+    "title": "",
+    "verified": false,
+    "premium": false,
+    "tester": false,
+    "team": "",
+    "favoriteKit": "",
+    "bio": "",
+    "badges": [
+      "Combat Grandmaster"
+    ],
+    "achievements": [],
+    "totalPoints": 99,
+    "position": 1
+  },
+  {
+    "id": 1794163204997,
+    "name": "Fahhh",
+    "region": "AS",
+    "skinUrl": "",
+    "namemc": "",
+    "results": {
+      "vanilla": {
+        "tier": "",
+        "points": ""
+      },
+      "uhc": {
+        "tier": "HT4",
+        "points": 99
+      },
+      "pot": {
+        "tier": "",
+        "points": ""
+      },
+      "sword": {
+        "tier": "",
+        "points": ""
+      },
+      "axe": {
+        "tier": "",
+        "points": ""
+      },
+      "nethpot": {
+        "tier": "",
+        "points": ""
+      },
+      "diamond-smp": {
+        "tier": "",
+        "points": ""
+      },
+      "spearmace": {
+        "tier": "",
+        "points": ""
+      }
+    },
+    "uuid": "",
+    "country": "",
+    "countryCode": "",
+    "flag": "",
+    "title": "",
+    "verified": false,
+    "premium": false,
+    "tester": false,
+    "team": "",
+    "favoriteKit": "",
+    "bio": "",
+    "badges": [
+      "Combat Master"
+    ],
+    "achievements": [],
+    "totalPoints": 99,
+    "position": 2
+  },
+  {
+    "id": 1794161495340,
+    "name": "Itz_Dhrubo",
+    "region": "AS",
+    "skinUrl": "",
+    "namemc": "",
+    "results": {
+      "vanilla": {
+        "tier": "LT3",
+        "points": 99
+      },
+      "uhc": {
+        "tier": "",
+        "points": ""
+      },
+      "pot": {
+        "tier": "",
+        "points": ""
+      },
+      "sword": {
+        "tier": "",
+        "points": ""
+      },
+      "axe": {
+        "tier": "",
+        "points": ""
+      },
+      "nethpot": {
+        "tier": "",
+        "points": ""
+      },
+      "diamond-smp": {
+        "tier": "",
+        "points": ""
+      },
+      "spearmace": {
+        "tier": "",
+        "points": ""
+      }
+    },
+    "uuid": "",
+    "country": "",
+    "countryCode": "",
+    "flag": "",
+    "title": "",
+    "verified": false,
+    "premium": false,
+    "tester": false,
+    "team": "",
+    "favoriteKit": "",
+    "bio": "",
+    "badges": [
+      "Combat Master"
+    ],
+    "achievements": [],
+    "totalPoints": 99,
+    "position": 3
+  }
+];
