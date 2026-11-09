@@ -198,7 +198,7 @@
 }
 .home-rank-row:hover{transform:translateY(-2px);border-color:#6366f1;box-shadow:0 16px 40px rgba(0,0,0,.4)}
 .home-rank-row .hrr-pos{font-size:22px;font-weight:900;font-style:italic;color:#fff;text-align:center}
-.home-rank-row .hrr-skin{width:64px;height:64px;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 6px 9px rgba(0,0,0,.6))}
+.home-rank-row .hrr-skin{width:64px;height:96px;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 6px 9px rgba(0,0,0,.6))}
 .home-rank-row .hrr-name{font-size:16px;font-weight:800;letter-spacing:-.2px;display:flex;flex-direction:column;gap:3px;min-width:0}
 .home-rank-row .hrr-region{font-size:11px;font-weight:700;color:#5f6a7d}
 .home-rank-row .hrr-tier{font-size:12px;font-weight:900;padding:5px 12px;border-radius:8px;border:1px solid transparent;white-space:nowrap}
@@ -273,7 +273,7 @@
   .home-board .board-row .points-cell{grid-column:2}
   .home-board .board-row .points-cell{text-align:left}
   .home-rank-row{grid-template-columns:40px 52px 1fr auto;gap:12px;padding:12px 14px}
-  .home-rank-row .hrr-skin{width:52px;height:52px}
+  .home-rank-row .hrr-skin{width:52px;height:78px}
   .home-rank-row .hrr-points{grid-column:3/5;text-align:left;font-size:15px}
   .home-rank-row .hrr-points small{display:inline;margin-left:5px}
   .home-features{grid-template-columns:1fr}

@@ -31,12 +31,14 @@
   const tierClass = (t) => "t-" + String(t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const tierDef = (code) => TIER_DEFS.find((t) => t.code === code) || { color: "#8b98ab", bg: "#232c39", label: code };
   const overallTier = (p) => { const t = TIER_DEFS.find((d) => (p.totalPoints || 0) >= d.min); return t ? t.code : ""; };
-  /* v13: skins render LARGE (mcpvp.com style).
-     skinUrl   -> 3D isometric head+bust (list rows, tier columns, player cards)
-     skinBodyUrl -> 3D isometric full body (podium, modal) */
-  const skinUrl = (p) => p.skinUrl || `https://mc-heads.net/head/${encodeURIComponent(p.name)}/200.png`;
+  /* v15: skins render LARGE + FULL BODY (mcpvp.com style).
+     skinUrl     -> 3D isometric FULL BODY (tiers rows, tier columns, player cards)
+     skinBodyUrl -> 3D isometric FULL BODY (podium, modal)
+     Both use mc-heads.net /body/ so the whole skin shows (waist down + arms),
+     not just the head. Facing direction is whatever the player's own skin has. */
+  const skinUrl = (p) => p.skinUrl || `https://mc-heads.net/body/${encodeURIComponent(p.name)}/200.png`;
   const skinBodyUrl = (p) => p.skinBodyUrl || `https://mc-heads.net/body/${encodeURIComponent(p.name)}/200.png`;
-  const skinFallback = (img) => { if (img.dataset.failed === "1") { img.src = "https://mc-heads.net/head/Steve/200.png"; return; } img.dataset.failed = "1"; img.src = "https://mc-heads.net/head/Steve/200.png"; };
+  const skinFallback = (img) => { if (img.dataset.failed === "1") { img.src = "https://mc-heads.net/body/Steve/200.png"; return; } img.dataset.failed = "1"; img.src = "https://mc-heads.net/body/Steve/200.png"; };
   const skinFallbackBody = (img) => { if (img.dataset.failed === "1") { img.src = "https://mc-heads.net/body/Steve/200.png"; return; } img.dataset.failed = "1"; img.src = "https://mc-heads.net/body/Steve/200.png"; };
   const titleFor = (pos) => (pos === 1 ? "Combat Grandmaster" : pos <= 3 ? "Combat Master" : "Combat Ace");
   const emojiFor = (pos) => (pos === 1 ? "👑" : pos <= 3 ? "🏅" : "⚔️");
