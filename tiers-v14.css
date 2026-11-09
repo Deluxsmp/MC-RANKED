@@ -52,26 +52,33 @@
   min-width:0;
 }
 
-/* ---- LARGE FULL-BODY skin (v15: whole body, waist down + arms) ---- */
+/* ---- BUST skin (v16: head -> waist, arms visible, legs cropped) ----
+   mc-heads.net /body/ returns a 200x480 full-body render.
+   object-fit:cover + object-position:center top scales it to the box width
+   (104/200 = 0.52 -> 104x249) and shows only the TOP slice, so the crop
+   lands right at the waist. The bottom fade makes the cut look intentional. */
 .tr-ava{
   flex:0 0 104px;
-  width:104px;height:140px;
+  width:104px;height:150px;
   border-radius:16px;
   overflow:hidden;
-  display:flex;align-items:flex-end;justify-content:center;
-  background:radial-gradient(circle at 50% 30%,#2b3444 0%,#161c26 72%);
+  display:block;
+  background:radial-gradient(circle at 50% 26%,#2f3a4c 0%,#161c26 74%);
   border:2px solid rgba(190,148,84,.5);
   box-shadow:0 0 0 1px rgba(0,0,0,.55) inset,0 8px 20px rgba(0,0,0,.55);
   position:relative;
   transition:border-color .18s ease,box-shadow .18s ease;
 }
 .tr-card:hover .tr-ava{border-color:rgba(232,186,110,.9);box-shadow:0 0 0 1px rgba(0,0,0,.55) inset,0 10px 26px rgba(0,0,0,.6),0 0 18px rgba(226,178,98,.28)}
+.tr-ava:after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:34px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(18,22,31,0),rgba(18,22,31,.92));
+}
 .tr-ava .tr-skin{
   width:100%;height:100%;
-  object-fit:contain;
-  object-position:center bottom;
+  object-fit:cover;
+  object-position:center top;
   image-rendering:auto;
-  transform:scale(1.02);
   filter:drop-shadow(0 4px 8px rgba(0,0,0,.6));
 }
 
@@ -130,7 +137,7 @@
 /* ---- responsive ---- */
 @media(max-width:880px){
   .tr-rank{flex:0 0 56px;font-size:21px}
-  .tr-ava{flex:0 0 84px;width:84px;height:114px}
+  .tr-ava{flex:0 0 84px;width:84px;height:122px}
   .tr-name{font-size:17px}
   .tr-kit{width:40px}
 }
@@ -138,7 +145,7 @@
   .tr-card{flex-wrap:wrap}
   .tr-rank{flex:0 0 46px;font-size:18px;align-self:stretch}
   .tr-main{padding:13px 13px;gap:13px;flex:1 1 100%}
-  .tr-ava{flex:0 0 72px;width:72px;height:98px}
+  .tr-ava{flex:0 0 72px;width:72px;height:104px}
   .tr-name{font-size:15.5px}
   .tr-sub{font-size:11.5px}
   .tr-kits{gap:5px;margin-top:9px}
@@ -151,10 +158,10 @@
 /* ---- also enlarge skins in the per-kit tier columns (mode view) ---- */
 .tier-player{padding:15px 14px 17px;gap:13px}
 .tier-player .tier-skin{
-  width:84px;height:104px;flex:0 0 84px;
-  object-fit:contain;object-position:center bottom;
+  width:84px;height:118px;flex:0 0 84px;
+  object-fit:cover;object-position:center top;
   border-radius:12px;
-  background:#161c26;
+  background:radial-gradient(circle at 50% 26%,#2f3a4c 0%,#161c26 74%);
   border:1px solid rgba(255,255,255,.1);
 }
 .tier-player .name{font-size:14.5px;font-weight:800}

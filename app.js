@@ -212,11 +212,19 @@
     const rest = sorted.slice(3, 5);
     const st = derivedStats();
     const statCards = [
-      ["players", "Total Players", "\ud83d\udc65"], ["kits", "Kits & Modes", "\ud83c\udfae"],
-      ["tiers", "Tiers", "\ud83c\udfc6"], ["regions", "Regions", "\ud83c\udf0d"],
-      ["countries", "Countries", "\ud83c\udff3\ufe0f"], ["tourneys", "Tourneys", "\ud83c\udfc5"],
-      ["news", "News Posts", "\ud83d\udcf0"], ["servers", "Servers", "\ud83c\udf10"]
+      ["countries", "Countries", "🏳️"], ["tourneys", "Tourneys", "🏅"],
+      ["news", "News Posts", "📰"], ["servers", "Servers", "🌐"]
     ].map(([k, l, ic]) => `<div class="home-stat"><span class="hs-icon">${ic}</span><div class="hs-value">${(st[k] ?? 0).toLocaleString()}</div><div class="hs-label">${l}</div></div>`).join("");
+
+    /* v16: scrolling ticker — duplicated in the markup so the loop is seamless */
+    const tickerItems = [
+      `SEASON RESET · ${esc(SITE.nextRevealLabel || "SOON")}`,
+      `SERVER IP · ${esc(SITE.serverIp || "—")}`,
+      `${st.kits ?? 0} KITS RANKED`,
+      `${st.tiers ?? 0} TIERS · HT1–HT5 / LT1–LT5`,
+      `${st.countries ?? 0} COUNTRIES REPRESENTED`,
+      `GET TESTED · EARN YOUR TIER`
+    ].map((t) => `<span class="tk-item"><span class="tk-dot"></span>${t}</span>`).join("");
 
     const podium = top.length ? top.map((p, i) => {
       const cls = ["first", "second", "third"][i];
@@ -253,8 +261,15 @@
       </a>`;
     }).join("");
 
-    const leaderboardBlock = `<div class="home-podium">${podium}</div>
-         ${rows ? `<div class="home-rank-list">${rows}</div>` : ""}`;
+    const leaderboardBlock = (podium || rows)
+      ? `<div class="home-podium">${podium}</div>
+         ${rows ? `<div class="home-rank-list">${rows}</div>` : ""}`
+      : emptyState({
+          icon: "🏆",
+          title: "No players ranked yet",
+          text: "The leaderboard is empty right now. As soon as the first player is added — from the admin panel or by the Discord bot posting a result — the top 5 will appear here automatically.",
+          action: { href: "tiers.html", label: "View the tier list" }
+        });
 
     const news = (D.NEWS || []).slice(0, 2).map((n) => `
       <article class="news-card">
@@ -291,41 +306,55 @@
             <a class="btn btn-ghost" href="${esc(SITE.discordUrl || "#")}" target="_blank" rel="noopener">Join Discord</a>
           </div>
         </div>
+        <div class="home-hero-strip"><div class="wrap">
+          <div class="hs-item"><span class="hs-num">${(st.players ?? 0).toLocaleString()}</span><span class="hs-cap">Players</span></div>
+          <div class="hs-item"><span class="hs-num">${(st.kits ?? 0).toLocaleString()}</span><span class="hs-cap">Kits</span></div>
+          <div class="hs-item"><span class="hs-num">${(st.tiers ?? 0).toLocaleString()}</span><span class="hs-cap">Tiers</span></div>
+          <div class="hs-item"><span class="hs-num">${(st.regions ?? 0).toLocaleString()}</span><span class="hs-cap">Regions</span></div>
+        </div></div>
       </section>
 
-      <section class="section home-stats-section"><div class="wrap">
-        <div class="section-head">
-          <div><p class="eyebrow">Live Network</p><h2 class="section-title">MCRANKED at a glance</h2>
-            <p class="section-sub">Live counts, calculated automatically from the site data \u2014 add or remove anything in the admin panels and these update themselves.</p></div>
+      <div class="home-ticker"><div class="tk-track">${tickerItems}${tickerItems}</div></div>
+
+      <section class="home-sec"><div class="wrap">
+        <div class="home-sec-head">
+          <div class="hsh-left"><p class="hsh-eyebrow">Live Network</p><h2>MCRANKED at a glance</h2>
+            <p class="hsh-sub">Live counts, calculated automatically from the site data — add or remove anything in the admin panels and these update themselves.</p></div>
         </div>
         <div class="home-stats">${statCards}</div>
       </div></section>
 
-      <div class="wrap"><div class="divider"></div></div>
-
-      <section class="section"><div class="wrap">
-        <div class="section-head">
-          <div><p class="eyebrow">Leaderboard</p><h2 class="section-title">Top Players</h2>
-            <p class="section-sub">The best ${esc(SITE.siteName)} players, ranked by total points across every kit.</p></div>
+      <section class="home-sec tight"><div class="wrap">
+        <div class="home-sec-head">
+          <div class="hsh-left"><p class="hsh-eyebrow">Leaderboard</p><h2>Top Players</h2>
+            <p class="hsh-sub">The best ${esc(SITE.siteName)} players, ranked by total points across every kit.</p></div>
           <a class="btn btn-ghost btn-sm" href="tiers.html">Full Leaderboard →</a>
         </div>
         ${leaderboardBlock}
       </div></section>
 
-      <div class="wrap"><div class="divider"></div></div>
-
-      <section class="section"><div class="wrap">
-        <div class="section-head">
-          <div><p class="eyebrow">Gamemodes</p><h2 class="section-title">Kits &amp; Modes</h2>
-            <p class="section-sub">Every kit we rank players in. Counts update live as players are added.</p></div>
-          <a class="btn btn-ghost btn-sm" href="kits.html">All Kits \u2192</a>
+      <section class="home-sec tight"><div class="wrap">
+        <div class="home-sec-head">
+          <div class="hsh-left"><p class="hsh-eyebrow">Gamemodes</p><h2>Kits &amp; Modes</h2>
+            <p class="hsh-sub">Every kit we rank players in. Counts update live as players are added.</p></div>
+          <a class="btn btn-ghost btn-sm" href="kits.html">All Kits →</a>
         </div>
         <div class="home-kits">${kitCards}</div>
       </div></section>
 
-      <div class="wrap"><div class="divider"></div></div>
+      <section class="home-sec tight"><div class="wrap">
+        <div class="home-sec-head">
+          <div class="hsh-left"><p class="hsh-eyebrow">How it works</p><h2>From unknown to ranked</h2>
+            <p class="hsh-sub">Three steps between you and an official tier on the global leaderboard.</p></div>
+        </div>
+        <div class="home-steps">
+          <div class="home-step"><span class="stp-glow"></span><span class="stp-num"><b>01</b> Register</span><h3>Join the server</h3><p>Hop on ${esc(SITE.serverIp || "the server")} and register your Minecraft name so testers can find you.</p></div>
+          <div class="home-step"><span class="stp-glow"></span><span class="stp-num"><b>02</b> Get tested</span><h3>Fight a tester</h3><p>Duel a verified tester in any kit. Every kit is scored separately, so one bad mode never sinks your profile.</p></div>
+          <div class="home-step"><span class="stp-glow"></span><span class="stp-num"><b>03</b> Climb</span><h3>Earn your tier</h3><p>Your result is posted automatically and your tier, points and rank update on the leaderboard instantly.</p></div>
+        </div>
+      </div></section>
 
-      <section class="section"><div class="wrap">
+      <section class="home-sec tight"><div class="wrap">
         <div class="home-features">
           <a class="home-feature" href="tourneys.html">
             <img class="feature-image" src="images/trophy.png" alt="" loading="lazy">
@@ -338,9 +367,7 @@
         </div>
       </div></section>
 
-      <div class="wrap"><div class="divider"></div></div>
-
-      <section class="section"><div class="wrap">
+      <section class="home-sec tight"><div class="wrap">
         <div class="home-cta">
           <h2>Ready to prove you're <span class="grad">cracked</span>?</h2>
           <p>Get tested by our verified testers, earn your official tier across every kit, and climb the global leaderboard. Your rank is waiting.</p>
@@ -351,10 +378,9 @@
         </div>
       </div></section>
 
-      <div class="wrap"><div class="divider"></div></div>
-
-      <section class="section"><div class="wrap">
-        <div class="section-head"><div><p class="eyebrow">Updates</p><h2 class="section-title">Recent News</h2></div>
+      <section class="home-sec"><div class="wrap">
+        <div class="home-sec-head">
+          <div class="hsh-left"><p class="hsh-eyebrow">Updates</p><h2>Recent News</h2></div>
           <a class="btn btn-ghost btn-sm" href="news.html">All News →</a></div>
         <div class="news-grid">${newsBlock}</div>
       </div></section>`;
