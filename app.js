@@ -61,6 +61,15 @@
     return `<img class="${cls || "mode-icon-img"}" src="${esc(url)}" alt="${esc(m.n)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="icon-fallback" style="display:none">${esc(m.i || "•")}</span>`;
   };
   const badgeColor = (b) => (D.BADGE_CATALOG && D.BADGE_CATALOG[b]) || "#8b7cff";
+  /* v17: small kit chips for a player (top N tested kits) */
+  const topKitChips = (p, n) => {
+    const tested = MODES.filter((m) => m.id !== "overall" && isTested(result(p, m.id)));
+    return tested.slice(0, n || 3).map((m) => {
+      const r = result(p, m.id);
+      const td = tierDef(r.tier);
+      return `<span class="kit-chip" style="color:${td.color};border-color:${td.color}55;background:${td.bg}">${esc(m.n)} <b>${esc(r.tier)}</b></span>`;
+    }).join("");
+  };
 
   /* ---------- empty state ---------- */
   function emptyState(opts) {
@@ -228,12 +237,15 @@
 
     const podium = top.length ? top.map((p, i) => {
       const cls = ["first", "second", "third"][i];
+      const chips = topKitChips(p, 3);
       return `<a class="podium-card ${cls}" href="#" data-player="${p.id}">
+        ${i === 0 ? '<span class="podium-crown">\ud83d\udc51</span>' : ""}
         <span class="podium-place">${p.position}</span>
         <div class="podium-name">${esc(p.name)}</div>
-        <img class="podium-avatar skin-full" src="${esc(skinBodyUrl(p))}" alt="${esc(p.name)}" onerror="skinFallbackBody(this)">
+        <div class="podium-ava-wrap"><img class="podium-avatar skin-full" src="${esc(skinBodyUrl(p))}" alt="${esc(p.name)}" onerror="skinFallbackBody(this)"></div>
         ${badgeChip(p.position)}
         <span class="podium-points">${p.totalPoints} Points</span>
+        ${chips ? `<div class="podium-kits">${chips}</div>` : ""}
         <span class="podium-ranknum">#${p.position}</span>
       </a>`;
     }).join("") : "";
@@ -260,6 +272,26 @@
         <span class="home-kit-count">${count} ranked</span>
       </a>`;
     }).join("");
+
+    /* v17: featured kit spotlight — the most-played kits, big and premium */
+    const featured = MODES.filter((m) => m.id !== "overall")
+      .map((m) => {
+        const tested = PLAYERS.filter((p) => isTested(result(p, m.id)));
+        const top = tested.slice().sort((a, b) => (Number(result(b, m.id).points) || 0) - (Number(result(a, m.id).points) || 0))[0];
+        return { m, count: tested.length, top };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+    const featuredCards = featured.map(({ m, count, top }) => `
+      <a class="feat-kit" href="kits.html">
+        <span class="feat-kit-glow"></span>
+        <span class="feat-kit-ico">${iconHTML(m, "feat-kit-img")}</span>
+        <span class="feat-kit-body">
+          <span class="feat-kit-name">${esc(m.n)}</span>
+          <span class="feat-kit-count">${count} player${count === 1 ? "" : "s"} ranked</span>
+        </span>
+        ${top ? `<span class="feat-kit-top"><img src="${esc(skinUrl(top))}" alt="" onerror="skinFallback(this)"><span><b>${esc(top.name)}</b><small>#1 in ${esc(m.n)}</small></span></span>` : `<span class="feat-kit-top feat-kit-empty">No one ranked yet</span>`}
+      </a>`).join("");
 
     const leaderboardBlock = (podium || rows)
       ? `<div class="home-podium">${podium}</div>
@@ -340,6 +372,15 @@
           <a class="btn btn-ghost btn-sm" href="kits.html">All Kits →</a>
         </div>
         <div class="home-kits">${kitCards}</div>
+      </div></section>
+
+      <section class="home-sec tight"><div class="wrap">
+        <div class="home-sec-head">
+          <div class="hsh-left"><p class="hsh-eyebrow">Spotlight</p><h2>Featured Kits</h2>
+            <p class="hsh-sub">The kits with the most ranked players right now, and who leads each one.</p></div>
+          <a class="btn btn-ghost btn-sm" href="kits.html">All Kits \u2192</a>
+        </div>
+        <div class="home-featured">${featuredCards}</div>
       </div></section>
 
       <section class="home-sec tight"><div class="wrap">
@@ -585,10 +626,10 @@
     const grid = [...PLAYERS].sort((a, b) => a.position - b.position).map(playerCard).join("");
     const emptyState = `<div class="card" style="grid-column:1/-1;padding:28px;text-align:center;line-height:1.8;">
         <div style="font-size:34px;margin-bottom:8px;">👤</div>
-        <h3 style="margin:0 0 8px;">এখনো কোনো player নেই</h3>
-        <p style="margin:0;opacity:.8;font-size:14px;">Player list খালি — এটা স্বাভাবিক।<br>
-        Discord bot-এ <code>/register</code> বা <code>/result</code> দিলে player এখানে automatic যোগ হবে।<br>
-        অথবা <a href="admin.html">Admin Panel</a> থেকে player যোগ করে <code>players.js</code> download করুন।</p>
+        <h3 style="margin:0 0 8px;">No players yet</h3>
+        <p style="margin:0;opacity:.8;font-size:14px;">The player list is empty — that is expected.<br>
+        Run <code>/register</code> or <code>/result</code> in the Discord bot and players appear here automatically.<br>
+        Or add players from the <a href="admin.html">Admin Panel</a> and download <code>players.js</code>.</p>
       </div>`;
     root.innerHTML = `
       <div class="page-head"><div class="wrap">
@@ -628,19 +669,19 @@
     if (live) {
       html = `<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:12px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.35);font-size:13.5px;line-height:1.6;">
         <span style="font-size:16px;">🟢</span>
-        <div><b>Live data — Supabase</b><br>এই page-এর সব player সরাসরি আপনার Supabase <code>players</code> table থেকে আসছে। Discord bot-এ result দিলে কয়েক সেকেন্ডেই এখানে দেখা যাবে।</div>
+        <div><b>Live data — Supabase</b><br>Every player on this page comes straight from your Supabase <code>players</code> table. Submit a result in the Discord bot and it shows up here within seconds.</div>
       </div>`;
     } else if (!hasKey) {
       html = `<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:12px;background:rgba(234,179,8,.10);border:1px solid rgba(234,179,8,.35);font-size:13.5px;line-height:1.6;">
         <span style="font-size:16px;">🟡</span>
-        <div><b>Static data — players.js</b><br>Supabase key এখনো বসানো হয়নি, তাই data আসছে <code>players.js</code> ফাইল থেকে।<br>
-        চালু করতে: <code>supabase-config.js</code> খুলে <code>url</code> আর <code>anonKey</code> বসান (Supabase → Project Settings → API Keys → Project URL + <code>sb_publishable_...</code>)।</div>
+        <div><b>Static data — players.js</b><br>No Supabase key is configured yet, so data is coming from the <code>players.js</code> file.<br>
+        To enable live data: open <code>supabase-config.js</code> and set <code>url</code> and <code>anonKey</code> (Supabase → Project Settings → API Keys → Project URL + <code>sb_publishable_...</code>).</div>
       </div>`;
     } else {
       html = `<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:12px;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.35);font-size:13.5px;line-height:1.6;">
         <span style="font-size:16px;">🔴</span>
-        <div><b>Supabase-এ connect করা যায়নি</b><br>Key বসানো আছে কিন্তু data আসেনি। সম্ভাব্য কারণ: <code>players</code> table এখনো তৈরি হয়নি, অথবা key ভুল।<br>
-        সমাধান: Supabase → SQL Editor-এ <code>supabase-setup.sql</code> run করুন, তারপর page reload করুন। (এখন <code>players.js</code> দেখানো হচ্ছে)</div>
+        <div><b>Could not connect to Supabase</b><br>A key is configured but no data arrived. Likely cause: the <code>players</code> table has not been created yet, or the key is wrong.<br>
+        Fix: run <code>supabase-setup.sql</code> in Supabase → SQL Editor, then reload the page. (Showing <code>players.js</code> for now)</div>
       </div>`;
     }
     box.innerHTML = html;

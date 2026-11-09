@@ -1,12 +1,12 @@
 /* ============================================================
    MCRANKED — SUPABASE LIVE READ  (Option A)
    ------------------------------------------------------------
-   প্রতিটা page-এ app.js-এর আগে load হয়। supabase-config.js-এ key
-   দেওয়া থাকলে live `players` table পড়ে app.js-কে দেয়।
-   key না থাকলে বা request fail করলে চুপচাপ players.js ব্যবহার করে —
-   site কখনো ভাঙবে না।
+   Loaded on every page before app.js. If a key is set in supabase-config.js,
+   it reads the live `players` table and hands the rows to app.js.
+   If no key is set, or the request fails, it silently falls back to players.js —
+   the site never breaks.
 
-   Load order (প্রতিটা HTML-এ):
+   Load order (on every HTML page):
      <script src="supabase-config.js"></script>
      <script src="supabase-live.js"></script>
      <script src="players.js"></script>
@@ -25,7 +25,7 @@
 
   /* Not configured -> resolve with null so app.js uses players.js. */
   if (!url || !key) {
-    console.info("[MCRANKED] Supabase key নেই — players.js থেকে data দেখানো হচ্ছে।");
+    console.info("[MCRANKED] No Supabase key — showing data from players.js.");
     window.MCRANKED_LIVE = Promise.resolve(null);
     return;
   }
@@ -57,7 +57,7 @@
     })
     .then(function (rows) {
       if (!Array.isArray(rows)) return null;
-      console.info("[MCRANKED] Supabase live: " + rows.length + " player পাওয়া গেছে।");
+      console.info("[MCRANKED] Supabase live: " + rows.length + " player(s) loaded.");
       window.MCRANKED_LIVE_ACTIVE = true;
       return rows.map(rowToPlayer);
     })

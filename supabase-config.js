@@ -1,34 +1,34 @@
 /* ============================================================
    MCRANKED — SUPABASE CONFIG  (Option A)
    ------------------------------------------------------------
-   👉 এই ফাইলে শুধু ২টা জায়গায় আপনার key বসাবেন।
-      নিচের "PASTE HERE" লেখা লাইনের ভেতরে।
+   👉 In this file you only set two values.
+      Put them inside the "PASTE HERE" lines below.
 
-   কোথায় পাবেন (আপনার screenshot-এ যেটা দেখছেন):
-     Supabase Dashboard -> Project Settings -> API Keys
-       Project URL          -> url      (যেমন https://abcdefgh.supabase.co)
-       sb_publishable_...   -> anonKey  (Publishable key — এটাই এখানে বসবে)
+   Where to find them (Supabase Dashboard -> Project Settings -> API Keys):
+       Project URL          -> url      (e.g. https://abcdefgh.supabase.co)
+       sb_publishable_...   -> anonKey  (Publishable key — use this one here)
 
-   ⚠️ sb_secret_... (Secret / service_role) key এখানে কখনো বসাবেন না।
-      ওটা শুধু bot-এর .env ফাইলে যাবে।
+   ⚠️ Never put an sb_secret_... (Secret / service_role) key here.
+      That one belongs only in the bot's .env file.
 
-   খালি রাখলে website players.js থেকে data দেখাবে (কিছু ভাঙবে না)।
+   Leave both empty and the website reads data from players.js
+   (nothing breaks).
    ============================================================ */
 
 window.SUPABASE_CONFIG = {
-  /* 👇 PASTE HERE — ১) Project URL */
+  /* 👇 PASTE HERE — 1) Project URL */
   url: "",
 
-  /* 👇 PASTE HERE — ২) sb_publishable_... key */
+  /* 👇 PASTE HERE — 2) sb_publishable_... key */
   anonKey: "",
 
   table: "players"
 };
 
 /* ------------------------------------------------------------
-   নিচের অংশ automatic — হাত দিতে হবে না।
-   পুরনো নাম (window.SUPABASE_URL / window.SUPABASE_ANON_KEY)
-   দিয়েও কাজ করবে, তাই আগের setup ভাঙবে না।
+   The part below is automatic — no manual editing needed.
+   The legacy names (window.SUPABASE_URL / window.SUPABASE_ANON_KEY)
+   keep working too, so an older setup will not break.
    ------------------------------------------------------------ */
 (function () {
   "use strict";

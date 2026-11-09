@@ -84,6 +84,31 @@ const TIER_DEFS = [
   { code: "LT5", label: "Low Tier 5",  min: 0,   color: "#858d9c", bg: "#202834" }
 ];
 
+/* ---------- TIER POINTS (v17: SINGLE SOURCE OF TRUTH) ----------
+   Every tier maps to a fixed point value. The admin panel auto-fills the
+   points field from this map the moment a tier is selected, and the public
+   site uses the same numbers for kit chips / tier tags. Change a value here
+   and it changes everywhere (admin, tiers page, home page, bot docs).
+
+   Order (lowest -> highest):  LT5 < HT5 < LT4 < HT4 < LT3 < HT3 < LT2 < HT2 < LT1 < HT1
+   v18 values: 5, 10, 15, 20, 30, 40, 50, 60, 70, 80
+*/
+const TIER_POINTS = {
+  LT5: 5,
+  HT5: 10,
+  LT4: 15,
+  HT4: 20,
+  LT3: 30,
+  HT3: 40,
+  LT2: 50,
+  HT2: 60,
+  LT1: 70,
+  HT1: 80
+};
+
+/* Ordered list used by the admin dropdown (highest first, like the site). */
+const TIER_ORDER = ["HT1", "LT1", "HT2", "LT2", "HT3", "LT3", "HT4", "LT4", "HT5", "LT5"];
+
 /* ---------- BADGE / RANK SYSTEM (point-based, auto-assigned) ----------
    Ranked by total points (highest first):
      position 1        -> Combat Grandmaster
@@ -173,4 +198,4 @@ const ICONS = {
 };
 
 /* ---------- EXPORT (global) ---------- */
-window.MCRANKED = { SITE, REGIONS, TIER_DEFS, RANK_BADGES, MODES, PLAYERS, LIVE_MATCHES, NEWS, SERVER_REGIONS, TOURNEYS, BADGE_CATALOG, ICONS };
+window.MCRANKED = { SITE, REGIONS, TIER_DEFS, TIER_POINTS, TIER_ORDER, RANK_BADGES, MODES, PLAYERS, LIVE_MATCHES, NEWS, SERVER_REGIONS, TOURNEYS, BADGE_CATALOG, ICONS };
